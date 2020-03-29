@@ -68,7 +68,7 @@ To fix this, we need to exclude rows where `Side` = ∆. By doing this, we know 
 Now, we can look at the information that can be extracted from only tournament_id, PlNum, and RoundNum: DefNum, Side. We can extract those into a new table:
 
 > ### Table 5
-> `Matchup`: <u>tournament_id, RoundNum, PlNum</u>, DefNum, Side
+> `Matchup`: <u>tournament_id, RoundNum, PlNum</u>, DefNum
 
 The only other attribute with a non-key dependency is `BallotResult`. Like with `TotalBallots`, we could extract this to its own table. But like with `TotalBallots`, the calculation is simple enough that we're better off removing it and using a view to re-do the calculation.
 
