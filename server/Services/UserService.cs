@@ -2,8 +2,6 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using MockTrial.Models;
