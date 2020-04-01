@@ -2,7 +2,7 @@ import * as React from 'react';
 const { useState } = React;
 import * as ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { Navbar, NavbarToggler, Collapse, NavItem } from 'reactstrap';
+import { Navbar, NavbarToggler, Collapse, NavItem, Nav } from 'reactstrap';
 // import Landing from './components/landing';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import './stylesheets/main.scss';
@@ -13,12 +13,14 @@ const App = () => {
 	return (
 		<Router>
 			<div>
-				<Navbar>
+				<Navbar color="dark" dark expand="md">
 					<NavbarToggler onClick={() => setOpen(!isOpen)} />
-					<Collapse isOpen={isOpen}>
-						<NavItem>Tournaments</NavItem>
-						<NavItem>Teams</NavItem>
-						<NavItem>Stats</NavItem>
+					<Collapse isOpen={isOpen} navbar>
+						<Nav navbar color="light">
+							<NavItem>Tournaments</NavItem>
+							<NavItem>Teams</NavItem>
+							<NavItem>Stats</NavItem>
+						</Nav>
 					</Collapse>
 				</Navbar>
 				<div>
