@@ -7,13 +7,25 @@ require("babel-polyfill");
 module.exports = {
 	context: path.join(__dirname, '/src'),
 	mode: 'development',
-	entry: ['babel-polyfill', './App.jsx'],
+	entry: ['babel-polyfill', './App.tsx'],
+	resolve: {
+		extensions: [".ts", ".tsx"]
+	},
 	output: {
 		filename: '[name].[chunkhash].js',
 		path: path.resolve(__dirname, '../server/wwwroot')
 	},
 	module: {
 		rules: [
+			{
+				test: /\.ts(x?)$/,
+				exclude: /node_modules/,
+				use: [
+						{
+								loader: "ts-loader"
+						}
+				]
+			},
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules/,
