@@ -342,3 +342,5 @@ healthchecksdb
 .vscode
 bundle.js
 wwwroot
+
+full-data.csv
