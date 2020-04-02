@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MockTrial.Data;
 using Microsoft.EntityFrameworkCore;
 using MockTrial.Helpers;
-using MockTrial.Services;
 using System.Text;
+using EntityGraphQL.Schema;
 
 namespace server
 {
@@ -30,7 +30,7 @@ namespace server
 
             services.AddApiVersioning();
 
-            services.AddScoped<IMockTrialService, MockTrialService>();
+            services.AddSingleton(SchemaBuilder.FromObject<MockTrialContext>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
