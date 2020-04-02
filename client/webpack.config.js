@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+var DashboardPlugin = require("webpack-dashboard/plugin");
 require("babel-polyfill");
 
 module.exports = {
@@ -56,9 +57,10 @@ module.exports = {
 		]
 	},
 	resolve: {
-		extensions: [ '*', '.js', '.jsx' ]
+		extensions: [ '*', '.js', '.jsx', '.ts', '.tsx' ]
 	},
 	plugins: [
+		new DashboardPlugin(),
 		new MiniCssExtractPlugin({
 			filename: 'style.[contenthash].css'
 		}),

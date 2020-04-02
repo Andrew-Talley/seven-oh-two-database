@@ -1,0 +1,11 @@
+query getTournamentsView {
+  allTournaments {
+    id,
+    name,
+    start,
+    end,
+    host,
+    size,
+    averageTPR
+  }
+}

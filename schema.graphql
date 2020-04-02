@@ -1,0 +1,21 @@
+scalar Date
+
+type Tournament {
+  id: Int!
+  name: String!
+  start: Date
+  end: Date
+  host: String
+
+  size: Int
+  case: Case!
+  averageTPR: Float
+}
+
+type Case {
+  id: Int!
+}
+
+type Query {
+  allTournaments: [Tournament!]!
+}
