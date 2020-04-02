@@ -10,6 +10,7 @@ using EntityGraphQL.Schema;
 namespace MockTrial.Controllers
 {
     [ApiController]
+    [Route("[controller]")]
     public class QueryController : ControllerBase
     {
         private readonly MockTrialContext _context;
@@ -21,7 +22,6 @@ namespace MockTrial.Controllers
             this._schemaProvider = schemaProvider;
         }
 
-        [Route("")]
         public IActionResult Post([FromBody] QueryRequest query)
         {
             try
