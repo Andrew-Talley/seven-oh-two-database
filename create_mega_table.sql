@@ -233,6 +233,13 @@ DELETE FROM megatable
 
 DELETE FROM megatable
 	WHERE Side = "Δ";
+
+UPDATE megatable
+	SET start_date = STR_TO_DATE(start_date, '%M %e, %Y')
+WHERE start_date IS NOT NULL AND start_date != "";
+UPDATE megatable
+	SET end_date = STR_TO_DATE(end_date, '%M %e, %Y')
+WHERE end_date IS NOT NULL AND end_date != "";
     
 SET SQL_SAFE_UPDATES=1;
 
@@ -240,9 +247,9 @@ SET SQL_SAFE_UPDATES=1;
 --   Generate tables	--
 -- -------------------- --
 
-DROP TABLE IF EXISTS `project2`.`CaseNames` ;
+DROP TABLE IF EXISTS CaseNames;
 
-CREATE TABLE IF NOT EXISTS `project2`.`CaseNames` (
+CREATE TABLE IF NOT EXISTS CaseNames (
   `year` INT NOT NULL,
   `level` VARCHAR(45) NOT NULL,
   `case_name` VARCHAR(45) NOT NULL,
@@ -251,9 +258,9 @@ CREATE TABLE IF NOT EXISTS `project2`.`CaseNames` (
 ENGINE = InnoDB;
 
 
-DROP TABLE IF EXISTS `project2`.`Tournament` ;
+DROP TABLE IF EXISTS Tournament;
 
-CREATE TABLE IF NOT EXISTS `project2`.`Tournament` (
+CREATE TABLE IF NOT EXISTS Tournament (
   `tournament_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `division` VARCHAR(45) NULL,
@@ -266,7 +273,6 @@ CREATE TABLE IF NOT EXISTS `project2`.`Tournament` (
   `bid_start_date` DATE NULL,
   `bid_end_date` DATE NULL,
   `bid_location` VARCHAR(45) NULL,
-  `third_coin_flip` VARCHAR(45) NULL,
   `level` VARCHAR(45) NOT NULL,
   `7th_place_after_r3` VARCHAR(45) NULL,
   `number_of_bids` TINYINT NULL,
@@ -277,8 +283,11 @@ CREATE TABLE IF NOT EXISTS `project2`.`Tournament` (
     FOREIGN KEY (`year` , `level`)
     REFERENCES `project2`.`CaseNames` (`year` , `level`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    ON UPDATE NO ACTION);
+        
+INSERT INTO Tournament (name, division, start_date, end_date, host, location, bid_start_date, bid_end_date, bid_location, level, year)
+	SELECT DISTINCT tournament_name AS name, division, STR_TO_DATE(start_date, '%M %e, %Y'), STR_TO_DATE(end_date, '%M %e, %Y'), tournament_host AS host, location, bid_start_date, bid_end_date, bid_location, tournament_level AS level, tournament_year AS year
+		FROM megatable;
 
 
 DROP TABLE IF EXISTS `project2`.`TeamInfo` ;

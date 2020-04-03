@@ -84,8 +84,12 @@ Next, there are a number of attributes that depend on the year and the team_num.
 
 Of the remaining columns, we have a large number of columns that depend on (tournament_id, team_num). But within these, there's another non-key dependency – total_ballots depends on total_wins and total_ties (specifically – total_ballots = total_wins + (total_ties/2)). We could create a separate table for these, but since the equation for finding it is so simple, it would be more efficient to do that calculation in a view, so we can just remove total_ballots. This gives us another table:
 
-> ### Table 5: 
 > `Team`: <u>tournament_id, team_num</u>, total_wins, total_ties, total_losses, won_spamta, spamta_honorable_mention, spamta_ranks, total_cs, total_ocs, total_pd, rank, tpr_group_designator
+
+However, many of these (wins, ties, losses, cs, ocs, pd, rank, and tpr_group_designator) can all be calculated from the ballot information and the information about other teams. Therefore, to maintain data integrity, these can all be removed and re-calculated with views. This results in the table:
+
+> ### Table 5: 
+> `TeamTournamentResults`: <u>tournament_id, team_num</u>, won_spamta, spamta_honorable_mention, spamta_ranks
 
 Here are the remaining columns: tournament_id, ballot_id, round_num, team_num, opp_num, opp_name, side, PD, BallotResult
 
