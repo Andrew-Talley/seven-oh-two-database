@@ -58,14 +58,14 @@ const App = () => {
 					</Navbar>
 					<Container>
 						<Switch>
-							{routes.map(r => (
-								<Route 
-									key={r.path}
-									path={r.path}
-								>
-									<r.component></r.component>
-								</Route>
-							))}
+							<div className="pt-4">
+								{routes.map(r => (
+									<Route 
+										key={r.path}
+										{...r}
+									/>
+								))}
+							</div>
 						</Switch>
 					</Container>
 				</div>

@@ -235,32 +235,235 @@ DELETE FROM megatable
 	WHERE Side = "Δ";
     
 SET SQL_SAFE_UPDATES=1;
-    
-CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
-  ballot_id INT NOT NULL,
-  Matchup_tournament_id INT UNSIGNED NOT NULL,
-  Matchup_pl_num SMALLINT NOT NULL,
-  Matchup_round_num SMALLINT NOT NULL,
-  pd SMALLINT NOT NULL,
-  ballot_result CHAR(1) NOT NULL,
-  PRIMARY KEY (`ballot_id`),
-  INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pl_num` ASC, `Matchup_round_num` ASC))
+
+-- -------------------- --
+--   Generate tables	--
+-- -------------------- --
+
+DROP TABLE IF EXISTS `project2`.`CaseNames` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`CaseNames` (
+  `year` INT NOT NULL,
+  `level` VARCHAR(45) NOT NULL,
+  `case_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`year`, `level`),
+  UNIQUE INDEX `case_name_UNIQUE` (`case_name` ASC))
 ENGINE = InnoDB;
 
-INSERT INTO Ballot
-	SELECT ballot_id, 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
-		FROM megatable; # Need to fix the tournament_id at some point
-        
+
+DROP TABLE IF EXISTS `project2`.`Tournament` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`Tournament` (
+  `tournament_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NULL,
+  `division` VARCHAR(45) NULL,
+  `start_date` DATE NULL,
+  `end_date` DATE NULL,
+  `host` VARCHAR(45) NULL,
+  `location` VARCHAR(45) NULL,
+  `first_coin_flip` VARCHAR(45) NULL,
+  `second_coin_flip` VARCHAR(45) NULL,
+  `bid_start_date` DATE NULL,
+  `bid_end_date` DATE NULL,
+  `bid_location` VARCHAR(45) NULL,
+  `third_coin_flip` VARCHAR(45) NULL,
+  `level` VARCHAR(45) NOT NULL,
+  `7th_place_after_r3` VARCHAR(45) NULL,
+  `number_of_bids` TINYINT NULL,
+  `year` INT NOT NULL,
+  PRIMARY KEY (`tournament_id`),
+  INDEX `fk_Tournament_CaseName_idx` (`year` ASC, `level` ASC),
+  CONSTRAINT `fk_Tournament_CaseName`
+    FOREIGN KEY (`year` , `level`)
+    REFERENCES `project2`.`CaseNames` (`year` , `level`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `project2`.`TeamInfo` ;
+CREATE TABLE IF NOT EXISTS `project2`.`TeamInfo` (
+  `team_num` SMALLINT NOT NULL,
+  `year` INT NOT NULL,
+  `team_name` VARCHAR(45) NULL,
+  `tpr_rank` TINYINT NULL,
+  `tpr_points` TINYINT NULL,
+  `school` VARCHAR(45) NULL,
+  PRIMARY KEY (`team_num`, `year`))
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `project2`.`TeamTournamentResults` ;
+CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
+  `tournament_id` INT UNSIGNED NOT NULL,
+  `team_num` SMALLINT NOT NULL,
+  `total_wins` TINYINT NULL,
+  `total_ties` TINYINT NULL,
+  `total_losses` TINYINT NULL,
+  `won_SPAMTA` TINYINT NULL,
+  `SPAMTA_honorable_mention` TINYINT NULL,
+  `SPAMTA_ranks` TINYINT NULL,
+  `total_cs` TINYINT NULL,
+  `total_ocs` SMALLINT NULL,
+  `total_pd` SMALLINT NULL,
+  `rank` TINYINT NULL,
+  PRIMARY KEY (`tournament_id`, `team_num`),
+  INDEX `fk_TeamName_team_num_idx` (`team_num` ASC),
+  INDEX `fk_Team_Tournament1_idx` (`tournament_id` ASC),
+  CONSTRAINT `fk_TeamName_team_num`
+    FOREIGN KEY (`team_num`)
+    REFERENCES `project2`.`TeamInfo` (`team_num`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Team_Tournament1`
+    FOREIGN KEY (`tournament_id`)
+    REFERENCES `project2`.`Tournament` (`tournament_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `project2`.`Student` ;
+CREATE TABLE IF NOT EXISTS `project2`.`Student` (
+  `student_id` INT UNSIGNED NOT NULL,
+  `tournament_id` INT NOT NULL,
+  `team_num` INT NOT NULL,
+  `student` VARCHAR(45) NOT NULL,
+  `role` VARCHAR(8) NOT NULL,
+  `ranks` TINYINT UNSIGNED NOT NULL,
+  `side` VARCHAR(8) COLLATE 'DEFAULT' NOT NULL,
+  PRIMARY KEY (`student_id`, `tournament_id`, `team_num`),
+  INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC),
+  CONSTRAINT `fk_Student_Team1`
+    FOREIGN KEY (`team_num`)
+    REFERENCES `project2`.`TeamTournamentResults` (`team_num`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `project2`.`AMTARep` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`AMTARep` (
+  `amta_rep_num` INT UNSIGNED NOT NULL,
+  `amta_rep` VARCHAR(45) NOT NULL,
+  `tournament_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`amta_rep_num`, `tournament_id`),
+  INDEX `fk_AMTARep_Tournament_idx` (`tournament_id` ASC),
+  CONSTRAINT `fk_AMTARep_Tournament`
+    FOREIGN KEY (`tournament_id`)
+    REFERENCES `project2`.`Tournament` (`tournament_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `project2`.`Matchup` ;
+
 CREATE TABLE IF NOT EXISTS `project2`.`Matchup` (
   `tournament_id` INT UNSIGNED NOT NULL,
   `pl_num` SMALLINT NOT NULL,
   `round_num` SMALLINT NOT NULL,
   `def_num` SMALLINT NOT NULL,
-  PRIMARY KEY (`tournament_id`, `pl_num`, `round_num`),
+  PRIMARY KEY (`pl_num`, `round_num`),
   INDEX `fk_Matchup_Team1_idx` (`tournament_id` ASC, `pl_num` ASC),
-  INDEX `fk_Team_team_num_idx` (`def_num` ASC))
-ENGINE = InnoDB;
+  INDEX `fk_TeamTournamentResults_def_idx` (`tournament_id` ASC, `def_num` ASC),
+  CONSTRAINT `fk_TeamTournamentResults_pl`
+    FOREIGN KEY (`tournament_id` , `pl_num`)
+    REFERENCES `project2`.`TeamTournamentResults` (`tournament_id` , `team_num`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_TeamTournamentResults_def`
+    FOREIGN KEY (`tournament_id` , `def_num`)
+    REFERENCES `project2`.`TeamTournamentResults` (`tournament_id` , `team_num`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 
+
+DROP TABLE IF EXISTS `project2`.`Ballot` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
+  `ballot_id` INT NOT NULL,
+  `Matchup_tournament_id` INT UNSIGNED NOT NULL,
+  `Matchup_pl_num` SMALLINT NOT NULL,
+  `Matchup_round_num` SMALLINT NOT NULL,
+  `pd` SMALLINT NOT NULL,
+  `ballot_result` CHAR(1) NOT NULL,
+  PRIMARY KEY (`ballot_id`, `Matchup_tournament_id`, `Matchup_pl_num`, `Matchup_round_num`),
+  INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pl_num` ASC, `Matchup_round_num` ASC),
+  CONSTRAINT `fk_Ballot_Matchup1`
+    FOREIGN KEY (`Matchup_tournament_id` , `Matchup_pl_num` , `Matchup_round_num`)
+    REFERENCES `project2`.`Matchup` (`tournament_id` , `pl_num` , `round_num`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+DROP TABLE IF EXISTS `project2`.`CaseDetails` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`CaseDetails` (
+  `case_name` VARCHAR(45) NOT NULL,
+  `full_case` VARCHAR(45) NULL,
+  `nationals_case` VARCHAR(45) NULL,
+  `type_charge` VARCHAR(45) NULL,
+  PRIMARY KEY (`case_name`),
+  CONSTRAINT `fk_CaseName_CaseDetails`
+    FOREIGN KEY (`case_name`)
+    REFERENCES `project2`.`CaseNames` (`case_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+DROP TABLE IF EXISTS `project2`.`CaseComponents` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`CaseComponents` (
+  `case_name` VARCHAR(45) NOT NULL,
+  `n_key` TINYINT NOT NULL,
+  `charge` VARCHAR(45) NULL,
+  `witness_name` VARCHAR(45) NULL,
+  `exhibit_name` VARCHAR(45) NULL,
+  `exhibit_url` VARCHAR(152) NULL,
+  PRIMARY KEY (`case_name`, `n_key`),
+  UNIQUE INDEX `witness_name_UNIQUE` (`witness_name` ASC),
+  INDEX `exhibit_name` (`exhibit_name` ASC),
+  CONSTRAINT `fk_CaseDetails_CaseComponents`
+    FOREIGN KEY (`case_name`)
+    REFERENCES `project2`.`CaseDetails` (`case_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+-- -----------------------------------------------------
+-- Table `project2`.`WitnessDetails`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `project2`.`WitnessDetails` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`WitnessDetails` (
+  `witness_name` VARCHAR(45) NOT NULL,
+  `witness_type` VARCHAR(45) NULL,
+  `witness_side` VARCHAR(8) NULL,
+  `witness_affidaivit` VARCHAR(45) NULL,
+  INDEX `fk_WitnessDetails_CaseComponents_idx` (`witness_name` ASC),
+  PRIMARY KEY (`witness_name`),
+  CONSTRAINT `fk_WitnessDetails_CaseComponents`
+    FOREIGN KEY (`witness_name`)
+    REFERENCES `project2`.`CaseComponents` (`witness_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+DROP TABLE IF EXISTS `project2`.`Exhibit Details` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`Exhibit Details` (
+  `exhibit_name` VARCHAR(45) NOT NULL,
+  `exhibit_url` VARCHAR(152) NOT NULL,
+  INDEX `fk_case_components_exhibit_idx` (`exhibit_name` ASC),
+  PRIMARY KEY (`exhibit_name`));
+
+
+INSERT INTO Ballot
+	SELECT ballot_id, 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
+		FROM megatable; # Need to fix the tournament_id at some point
+        
 INSERT INTO Matchup
 	SELECT DISTINCT 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
 		FROM megatable;

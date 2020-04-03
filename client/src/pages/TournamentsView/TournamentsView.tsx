@@ -8,7 +8,7 @@ const TournamentsView: React.FC = () => {
 
   return (
     <React.Fragment>
-      <h1 className="mt-4">Tournaments</h1>
+      <h1>Tournaments</h1>
       <Link to="/tournament/1">Tournament 1!</Link>
       {/* <div className="d-flex justify-content-end">
         <Button 
