@@ -7,9 +7,37 @@ type Tournament {
   end: Date
   host: String
 
-  size: Int
+  teams: [TournamentTeamData!]!
   case: Case!
   averageTPR: Float
+}
+
+type TournamentTeamData {
+  tournament: Tournament!
+  team: Team!
+
+  wins: Int!
+  ties: Int!
+  losses: Int!
+
+  totalPD: Int!
+  totalCS: Int!
+  totalOCS: Int!
+
+  matchups: [Matchup!]!
+}
+
+type Matchup {
+  pl: Team!
+  def: Team!
+
+  pds: [Int!]!
+}
+
+type Team {
+  year: Int!
+  name: String!
+  num: Int!
 }
 
 type Case {
@@ -18,4 +46,5 @@ type Case {
 
 type Query {
   allTournaments: [Tournament!]!
+  tournament(tournamentId: Int): Tournament
 }

@@ -14,14 +14,14 @@ import { routes } from './routes';
 const App = () => {
 	const [isOpen, setOpen] = useState(false);
 
-	// const match = useRouteMatch();
+	// const match = useRouteMatch(); 
 
 	return (
 		<ApolloProvider client={client}>
 			<Router>
 				<div>
 					<Navbar color="primary" dark expand="md">
-						<NavbarBrand href="/">Mock Trial Data</NavbarBrand>
+						<NavbarBrand href="/">sevenohtwo</NavbarBrand>
 						<NavbarToggler onClick={() => setOpen(!isOpen)} />
 						<Collapse isOpen={isOpen} navbar>
 							<Nav navbar color="light">

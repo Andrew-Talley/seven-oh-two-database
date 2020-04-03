@@ -1,0 +1,14 @@
+query getSingleTournamentView($id: Int) {
+  tournament(tournamentId: $id) {
+    name
+    start
+    end
+    host
+    
+    teams {
+      wins
+      ties
+      losses
+    }
+  }
+}

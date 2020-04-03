@@ -1,0 +1,29 @@
+query getTouranmentResultData($id: Int!) {
+  tournament(tournamentId: $id) {
+    teams {
+      team {
+        name
+        num
+      }
+
+      wins
+      ties
+      losses
+
+      totalPD
+      totalCS
+      totalOCS
+
+      matchups {
+        pl {
+          num
+        }
+        def {
+          num
+        }
+
+        pds
+      }
+    }
+  }
+}

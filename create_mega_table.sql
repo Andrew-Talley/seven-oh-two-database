@@ -225,7 +225,42 @@ LOAD DATA INFILE '~/Google Drive/College Work/Junior/Spring/Databases/full-data.
 	OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
 
-SELECT *
-FROM megatable
-LIMIT 10;
 
+SET SQL_SAFE_UPDATES=0;
+
+DELETE FROM megatable
+	WHERE team_num = opp_num; # A team should never be playing itself – this means a team dropped out, so the tab shows them "playing themselves"
+
+DELETE FROM megatable
+	WHERE Side = "Δ";
+    
+SET SQL_SAFE_UPDATES=1;
+    
+CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
+  ballot_id INT NOT NULL,
+  Matchup_tournament_id INT UNSIGNED NOT NULL,
+  Matchup_pl_num SMALLINT NOT NULL,
+  Matchup_round_num SMALLINT NOT NULL,
+  pd SMALLINT NOT NULL,
+  ballot_result CHAR(1) NOT NULL,
+  PRIMARY KEY (`ballot_id`),
+  INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pl_num` ASC, `Matchup_round_num` ASC))
+ENGINE = InnoDB;
+
+INSERT INTO Ballot
+	SELECT ballot_id, 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
+		FROM megatable; # Need to fix the tournament_id at some point
+        
+CREATE TABLE IF NOT EXISTS `project2`.`Matchup` (
+  `tournament_id` INT UNSIGNED NOT NULL,
+  `pl_num` SMALLINT NOT NULL,
+  `round_num` SMALLINT NOT NULL,
+  `def_num` SMALLINT NOT NULL,
+  PRIMARY KEY (`tournament_id`, `pl_num`, `round_num`),
+  INDEX `fk_Matchup_Team1_idx` (`tournament_id` ASC, `pl_num` ASC),
+  INDEX `fk_Team_team_num_idx` (`def_num` ASC))
+ENGINE = InnoDB;
+
+INSERT INTO Matchup
+	SELECT DISTINCT 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
+		FROM megatable;

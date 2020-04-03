@@ -5,7 +5,12 @@ query getTournamentsView {
     start,
     end,
     host,
-    size,
     averageTPR
+
+    teams {
+      team {
+        num
+      }
+    }, # Get the number of teams
   }
 }
