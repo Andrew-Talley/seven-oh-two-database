@@ -302,20 +302,12 @@ CREATE TABLE IF NOT EXISTS `project2`.`TeamInfo` (
 ENGINE = InnoDB;
 
 
-DROP TABLE IF EXISTS `project2`.`TeamTournamentResults` ;
 CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
   `tournament_id` INT UNSIGNED NOT NULL,
   `team_num` SMALLINT NOT NULL,
-  `total_wins` TINYINT NULL,
-  `total_ties` TINYINT NULL,
-  `total_losses` TINYINT NULL,
   `won_SPAMTA` TINYINT NULL,
   `SPAMTA_honorable_mention` TINYINT NULL,
   `SPAMTA_ranks` TINYINT NULL,
-  `total_cs` TINYINT NULL,
-  `total_ocs` SMALLINT NULL,
-  `total_pd` SMALLINT NULL,
-  `rank` TINYINT NULL,
   PRIMARY KEY (`tournament_id`, `team_num`),
   INDEX `fk_TeamName_team_num_idx` (`team_num` ASC),
   INDEX `fk_Team_Tournament1_idx` (`tournament_id` ASC),
@@ -329,8 +321,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
     REFERENCES `project2`.`Tournament` (`tournament_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+ENGINE = InnoDB
 
 DROP TABLE IF EXISTS `project2`.`Student` ;
 CREATE TABLE IF NOT EXISTS `project2`.`Student` (
