@@ -12,6 +12,7 @@
 - (year) -> type_charge
 - (year, level) -> case_name
 - case_name -> {full_case, nationals_case, type_charge, charge\_[n], witness\_[n]\_name, exhibit\_[n]\_name, exhibit\_[n]\_url}
+- exhibit\_[n]\_url -> exhibit\_[n]\_name
 - witness\_[n]\_name -> {witness\_[n]\_type, witness\_[n]\_side, witness\_[n]\_affidaivit}
 
 - (team_num, year) -> {team_name, tpr_rank, tpr_points, school}
