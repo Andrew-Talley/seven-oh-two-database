@@ -59,7 +59,7 @@ CREATE TABLE megatable(
 	tab_note_1 VARCHAR(75),
 	tournament_year_1 VARCHAR(75),
 	case_name VARCHAR(75),
-	full_case VARCHAR(75),
+	full_case VARCHAR(95),
 	nationals_case VARCHAR(75),
 	case_type VARCHAR(10),
 	charge_1 VARCHAR(75),
@@ -123,7 +123,7 @@ CREATE TABLE megatable(
 	exhibit_4_url VARCHAR(134),
 	exhibit_5_name VARCHAR(80),
 	exhibit_5_url VARCHAR(134),
-	exhibit_6_name VARCHAR(80),
+	exhibit_6_name VARCHAR(90),
 	exhibit_6_url VARCHAR(134),
 	exhibit_7_name VARCHAR(80),
 	exhibit_7_url VARCHAR(134),
@@ -175,26 +175,6 @@ CREATE TABLE megatable(
 	exhibit_30_url VARCHAR(134),
 	exhibit_31_name VARCHAR(75),
 	exhibit_31_url VARCHAR(134),
-	exhibit_32_name CHAR(1),
-	exhibit_32_url CHAR(1),
-	exhibit_33_name CHAR(1),
-	exhibit_33_url CHAR(1),
-	exhibit_34_name CHAR(1),
-	exhibit_34_url CHAR(1),
-	exhibit_35_name CHAR(1),
-	exhibit_35_url CHAR(1),
-	exhibit_36_name CHAR(1),
-	exhibit_36_url CHAR(1),
-	exhibit_37_name CHAR(1),
-	exhibit_37_url CHAR(1),
-	exhibit_38_name CHAR(1),
-	exhibit_38_url CHAR(1),
-	exhibit_39_name CHAR(1),
-	exhibit_39_url CHAR(1),
-	exhibit_40_name CHAR(1),
-	exhibit_40_url CHAR(1),
-	exhibit_41_name CHAR(1),
-	exhibit_41_url CHAR(1),
 	bid_start_date VARCHAR(75),
 	bid_end_date VARCHAR(75),
 	bid_location VARCHAR(75),
@@ -233,13 +213,39 @@ DELETE FROM megatable
 
 DELETE FROM megatable
 	WHERE Side = "Δ";
+    
+UPDATE megatable
+	SET start_date = NULL
+WHERE start_date = "";
+UPDATE megatable
+	SET end_date = NULL
+WHERE end_date = "";
+
+UPDATE megatable
+	SET bid_start_date = NULL
+WHERE bid_start_date = "";
+UPDATE megatable
+	SET bid_end_date = NULL
+WHERE bid_end_date = "";
 
 UPDATE megatable
 	SET start_date = STR_TO_DATE(start_date, '%M %e, %Y')
-WHERE start_date IS NOT NULL AND start_date != "";
+WHERE start_date IS NOT NULL;
 UPDATE megatable
 	SET end_date = STR_TO_DATE(end_date, '%M %e, %Y')
-WHERE end_date IS NOT NULL AND end_date != "";
+WHERE end_date IS NOT NULL;
+
+UPDATE megatable
+	SET bid_start_date = STR_TO_DATE(bid_start_date, '%M %e, %Y')
+WHERE bid_start_date IS NOT NULL;
+UPDATE megatable
+	SET bid_end_date = STR_TO_DATE(bid_end_date, '%M %e, %Y')
+WHERE bid_end_date IS NOT NULL;
+
+UPDATE megatable
+	SET SPAMTA_ranks = NULL
+WHERE SPAMTA_ranks = "";
+
     
 SET SQL_SAFE_UPDATES=1;
 
@@ -262,33 +268,29 @@ DROP TABLE IF EXISTS Tournament;
 
 CREATE TABLE IF NOT EXISTS Tournament (
   `tournament_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NULL,
+  `name` VARCHAR(75) NULL,
   `division` VARCHAR(45) NULL,
   `start_date` DATE NULL,
   `end_date` DATE NULL,
-  `host` VARCHAR(45) NULL,
-  `location` VARCHAR(45) NULL,
+  `host` VARCHAR(75) NULL,
+  `location` VARCHAR(65) NULL,
   `first_coin_flip` VARCHAR(45) NULL,
   `second_coin_flip` VARCHAR(45) NULL,
   `bid_start_date` DATE NULL,
   `bid_end_date` DATE NULL,
   `bid_location` VARCHAR(45) NULL,
   `level` VARCHAR(45) NOT NULL,
-  `7th_place_after_r3` VARCHAR(45) NULL,
+  `bids_plus_one_after_r3` VARCHAR(45) NULL,
   `number_of_bids` TINYINT NULL,
   `year` INT NOT NULL,
   PRIMARY KEY (`tournament_id`),
-  INDEX `fk_Tournament_CaseName_idx` (`year` ASC, `level` ASC),
-  CONSTRAINT `fk_Tournament_CaseName`
-    FOREIGN KEY (`year` , `level`)
-    REFERENCES `project2`.`CaseNames` (`year` , `level`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
-        
-INSERT INTO Tournament (name, division, start_date, end_date, host, location, bid_start_date, bid_end_date, bid_location, level, year)
-	SELECT DISTINCT tournament_name AS name, division, STR_TO_DATE(start_date, '%M %e, %Y'), STR_TO_DATE(end_date, '%M %e, %Y'), tournament_host AS host, location, bid_start_date, bid_end_date, bid_location, tournament_level AS level, tournament_year AS year
-		FROM megatable;
-
+  INDEX `fk_Tournament_CaseName_idx` (`year` ASC, `level` ASC)
+--  CONSTRAINT `fk_Tournament_CaseName`
+--    FOREIGN KEY (`year` , `level`)
+--    REFERENCES `project2`.`CaseNames` (`year` , `level`)
+--    ON DELETE NO ACTION
+--    ON UPDATE NO ACTION
+);
 
 DROP TABLE IF EXISTS `project2`.`TeamInfo` ;
 CREATE TABLE IF NOT EXISTS `project2`.`TeamInfo` (
@@ -301,53 +303,52 @@ CREATE TABLE IF NOT EXISTS `project2`.`TeamInfo` (
   PRIMARY KEY (`team_num`, `year`))
 ENGINE = InnoDB;
 
-
-CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
+DROP TABLE IF EXISTS TeamTournamentResults;
+CREATE TABLE IF NOT EXISTS TeamTournamentResults (
   `tournament_id` INT UNSIGNED NOT NULL,
   `team_num` SMALLINT NOT NULL,
-  `won_SPAMTA` TINYINT NULL,
-  `SPAMTA_honorable_mention` TINYINT NULL,
+  `won_SPAMTA` BOOLEAN NULL,
+  `SPAMTA_honorable_mention` BOOLEAN NULL,
   `SPAMTA_ranks` TINYINT NULL,
   PRIMARY KEY (`tournament_id`, `team_num`),
   INDEX `fk_TeamName_team_num_idx` (`team_num` ASC),
   INDEX `fk_Team_Tournament1_idx` (`tournament_id` ASC),
-  CONSTRAINT `fk_TeamName_team_num`
+/*  CONSTRAINT `fk_TeamName_team_num`
     FOREIGN KEY (`team_num`)
     REFERENCES `project2`.`TeamInfo` (`team_num`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
+    ON UPDATE CASCADE,*/
   CONSTRAINT `fk_Team_Tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `project2`.`Tournament` (`tournament_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-
+    ON UPDATE NO ACTION);
+    
 DROP TABLE IF EXISTS `project2`.`Student` ;
 CREATE TABLE IF NOT EXISTS `project2`.`Student` (
-  `student_id` INT UNSIGNED NOT NULL,
+  `student_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tournament_id` INT NOT NULL,
   `team_num` INT NOT NULL,
-  `student` VARCHAR(45) NOT NULL,
+  `student` VARCHAR(1000) NOT NULL,
   `role` VARCHAR(8) NOT NULL,
   `ranks` TINYINT UNSIGNED NOT NULL,
-  `side` VARCHAR(8) COLLATE 'DEFAULT' NOT NULL,
+  `side` VARCHAR(8) NOT NULL,
   PRIMARY KEY (`student_id`, `tournament_id`, `team_num`),
-  INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC),
-  CONSTRAINT `fk_Student_Team1`
-    FOREIGN KEY (`team_num`)
-    REFERENCES `project2`.`TeamTournamentResults` (`team_num`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC)
+--   CONSTRAINT `fk_Student_Team1`
+--     FOREIGN KEY (`team_num`)
+--     REFERENCES `project2`.`TeamTournamentResults` (`team_num`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 DROP TABLE IF EXISTS `project2`.`AMTARep` ;
 
 CREATE TABLE IF NOT EXISTS `project2`.`AMTARep` (
+  `tournament_id` INT UNSIGNED NOT NULL,
   `amta_rep_num` INT UNSIGNED NOT NULL,
   `amta_rep` VARCHAR(45) NOT NULL,
-  `tournament_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`amta_rep_num`, `tournament_id`),
   INDEX `fk_AMTARep_Tournament_idx` (`tournament_id` ASC),
   CONSTRAINT `fk_AMTARep_Tournament`
@@ -460,10 +461,187 @@ CREATE TABLE IF NOT EXISTS `project2`.`Exhibit Details` (
   PRIMARY KEY (`exhibit_name`));
 
 
+INSERT INTO Tournament (name, division, start_date, end_date, host, location, bid_start_date, bid_end_date, bid_location, level, year)
+	SELECT DISTINCT tournament_name AS name, division, start_date, end_date, tournament_host AS host, location, bid_start_date, bid_end_date, bid_location, tournament_level AS level, tournament_year AS year
+		FROM megatable
+	WHERE tournament_year != "";
+    
+ALTER TABLE megatable
+	ADD COLUMN tournament_id INT UNSIGNED;
+
+SET SQL_SAFE_UPDATES=0;
+UPDATE megatable M
+	INNER JOIN Tournament T ON M.tournament_name = T.name AND T.year = M.tournament_year AND T.division = M.division AND T.year = M.tournament_year
+SET M.tournament_id = T.tournament_id
+WHERE M.tournament_year != "";
+
+DELETE FROM megatable
+	WHERE tournament_id IS NULL;
+    
+DROP TABLE IF EXISTS TEMP_faulty_tournament_id;
+CREATE TABLE TEMP_faulty_tournament_id (
+	tournament_id INT
+);
+
+INSERT INTO TEMP_faulty_tournament_id
+	SELECT M1.tournament_id
+		FROM (SELECT DISTINCT tournament_id, tab_note_0
+				FROM megatable M2) M1
+	GROUP BY M1.tournament_id
+	HAVING COUNT(*) > 1;
+    
+DELETE FROM megatable
+	WHERE tournament_id IN
+		(SELECT tournament_id FROM TEMP_faulty_tournament_id);
+
+DELETE FROM Tournament
+	WHERE tournament_id IN
+		(SELECT tournament_id FROM TEMP_faulty_tournament_id);
+
+DROP TABLE TEMP_faulty_tournament_id;
+
+SET SQL_SAFE_UPDATES=1;
+
+DROP TABLE IF EXISTS TEMP_tab_notes;
+
+CREATE TABLE TEMP_tab_notes (
+	tournament_id INT UNSIGNED NOT NULL,
+    num TINYINT,
+    note VARCHAR(75),
+    
+    PRIMARY KEY (tournament_id, num)
+);
+
+SELECT DISTINCT tournament_id, tab_note_1, tournament_name, tournament_year
+	FROM megatable;
+
+SELECT * FROM megatable WHERE tournament_id = 163;
+    
+SELECT Tournament.* FROM Tournament WHERE tournament_id IN (
+	SELECT M1.tournament_id
+	FROM (SELECT DISTINCT tournament_id, tab_note_0
+				FROM megatable M2) M1
+	GROUP BY M1.tournament_id
+    HAVING COUNT(*) > 1);
+
+INSERT INTO TEMP_tab_notes
+	SELECT DISTINCT tournament_id, 1, tab_note_1
+		FROM megatable;
+INSERT INTO TEMP_tab_notes
+	SELECT DISTINCT tournament_id, 2, tab_note_2
+		FROM megatable;
+INSERT INTO TEMP_tab_notes
+	SELECT DISTINCT tournament_id, 3, tab_note_3
+		FROM megatable;
+
+UPDATE Tournament T
+	INNER JOIN TEMP_tab_notes N ON T.tournament_id = N.tournament_id
+SET T.first_coin_flip = SUBSTRING(note, 19, 5)
+WHERE note LIKE 'Opening coin flip: Heads%' OR note LIKE 'Opening coin flip: Tails%';
+
+UPDATE Tournament T
+	INNER JOIN TEMP_tab_notes N ON T.tournament_id = N.tournament_id
+SET T.second_coin_flip = SUBSTRING(note, 19, 5)
+WHERE note LIKE 'Round 3 coin flip: Heads%' OR note LIKE 'Round 3 coin flip: Tails%';
+
+UPDATE Tournament T
+	INNER JOIN TEMP_tab_notes N ON T.tournament_id = N.tournament_id
+SET T.bids_plus_one_after_r3 = SUBSTRING(note, 32)
+WHERE note LIKE '_th place record after round 3:%';
+
+UPDATE Tournament T
+	INNER JOIN (
+		SELECT tournament_id, COUNT(*) AS number_of_bids
+			FROM megatable
+		WHERE earned_bid = 'TRUE'
+        GROUP BY tournament_id
+    ) R ON T.tournament_id = R.tournament_id
+SET T.number_of_bids = R.number_of_bids
+WHERE R.number_of_bids > 0;
+
+INSERT INTO TeamTournamentResults
+	SELECT DISTINCT tournament_id, team_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
+		FROM megatable;
+
+DROP PROCEDURE IF EXISTS insert_students;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_students()
+
+BEGIN
+	DECLARE student_num INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    SET student_num = 1;
+    SET SQL_SAFE_UPDATES=0;
+
+	WHILE student_num <= 5 DO
+    BEGIN
+    
+		SELECT CONCAT("UPDATE megatable SET student_", student_num, " = NULL WHERE student_", student_num, " = ''") INTO @sql_str;
+		PREPARE statement FROM @sql_str;           
+		EXECUTE statement;
+
+		SELECT CONCAT("UPDATE megatable SET role_", student_num, " = NULL WHERE role_", student_num, " = ''") INTO @sql_str;
+		PREPARE statement FROM @sql_str;           
+		EXECUTE statement;
+
+		SELECT CONCAT("UPDATE megatable SET ranks_", student_num, " = NULL WHERE ranks_", student_num, " = ''") INTO @sql_str;
+		PREPARE statement FROM @sql_str;           
+		EXECUTE statement;
+
+		SELECT CONCAT("UPDATE megatable SET side_", student_num, " = NULL WHERE side_", student_num, " = ''") INTO @sql_str;
+		PREPARE statement FROM @sql_str;           
+		EXECUTE statement;
+
+		SELECT CONCAT("INSERT INTO Student SELECT DISTINCT ", student_num, ", tournament_id, team_num, student_", student_num, " AS 'student', role_", student_num, " AS 'role', ranks_", student_num, " AS 'ranks', side_", student_num, " AS 'side' FROM megatable WHERE student_", student_num, " IS NOT NULL AND role_", student_num, " IS NOT NULL AND ranks_", student_num, " IS NOT NULL AND side_", student_num, " IS NOT NULL") INTO @sql_str;                           
+        PREPARE statement FROM @sql_str;           
+		EXECUTE statement;
+
+		SET student_num = student_num + 1;
+	END;
+	END WHILE;
+    
+    SET SQL_SAFE_UPDATES=1;
+    
+    SELECT * FROM Student;
+END //
+
+DELIMITER ;
+
+CALL insert_students();
+
+SELECT * FROM megatable WHERE tournament_id = 566 AND team_num = 1051;
+
+INSERT INTO Student
+	(SELECT DISTINCT 1, tournament_id, team_num, student_1 AS 'student', role_1 AS 'role', ranks_1 AS 'ranks', side_1 AS 'side' 
+		FROM megatable 
+	WHERE student_1 IS NOT NULL AND role_1 IS NOT NULL AND ranks_1 IS NOT NULL AND side_1 IS NOT NULL);
+    
+SELECT DISTINCT 1, tournament_id, team_num, student_1 AS 'student', role_1 AS 'role', ranks_1 AS 'ranks', side_1 AS 'side' 
+		FROM megatable 
+	WHERE student_1 IS NOT NULL AND role_1 IS NOT NULL AND ranks_1 IS NOT NULL AND side_1 IS NOT NULL;
+
+SELECT * FROM megatable LIMIT 3 OFFSET 44118;
+        
+INSERT INTO AMTARep
+	SELECT DISTINCT tournament_id, 0, amta_rep_0
+		FROM megatable;
+INSERT INTO AMTARep
+	SELECT DISTINCT tournament_id, 1, amta_rep_1
+		FROM megatable;
+INSERT INTO AMTARep
+	SELECT DISTINCT tournament_id, 2, amta_rep_2
+		FROM megatable
+	WHERE amta_rep_2 NOT LIKE '%coin flip%';
+
+SELECT * FROM TeamTournamentResults;
+
 INSERT INTO Ballot
-	SELECT ballot_id, 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
-		FROM megatable; # Need to fix the tournament_id at some point
+	SELECT ballot_id, tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
+		FROM megatable;
         
 INSERT INTO Matchup
-	SELECT DISTINCT 1, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
+	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
 		FROM megatable;
