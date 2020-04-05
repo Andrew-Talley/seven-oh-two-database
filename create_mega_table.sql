@@ -253,16 +253,29 @@ SET SQL_SAFE_UPDATES=1;
 --   Generate tables	--
 -- -------------------- --
 
+DROP TABLE IF EXISTS `project2`.`CaseDetails` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`CaseDetails` (
+  `case_name` VARCHAR(75) NOT NULL,
+  `full_case` VARCHAR(100) NULL,
+  `nationals_case` BOOLEAN NULL,
+  `type_charge` VARCHAR(8) NULL CHECK(`type_charge` IN(NULL, 'Civil' 'Criminal')),
+  PRIMARY KEY (`case_name`)
+) ENGINE = InnoDB;
+
 DROP TABLE IF EXISTS CaseNames;
 
 CREATE TABLE IF NOT EXISTS CaseNames (
   `year` INT NOT NULL,
-  `level` VARCHAR(45) NOT NULL,
-  `case_name` VARCHAR(45) NOT NULL,
+  `level` VARCHAR(75) NOT NULL,
+  `case_name` VARCHAR(75) NOT NULL,
   PRIMARY KEY (`year`, `level`),
-  UNIQUE INDEX `case_name_UNIQUE` (`case_name` ASC))
+  CONSTRAINT `fk_CaseName_CaseDetails`
+    FOREIGN KEY (`case_name`)
+    REFERENCES `project2`.`CaseDetails` (`case_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
 
 DROP TABLE IF EXISTS Tournament;
 
@@ -284,27 +297,27 @@ CREATE TABLE IF NOT EXISTS Tournament (
   `number_of_bids` TINYINT NULL,
   `year` INT NOT NULL,
   PRIMARY KEY (`tournament_id`),
-  INDEX `fk_Tournament_CaseName_idx` (`year` ASC, `level` ASC)
---  CONSTRAINT `fk_Tournament_CaseName`
---    FOREIGN KEY (`year` , `level`)
---    REFERENCES `project2`.`CaseNames` (`year` , `level`)
---    ON DELETE NO ACTION
---    ON UPDATE NO ACTION
-);
+  INDEX `fk_Tournament_CaseName_idx` (`year` ASC, `level` ASC),
+  CONSTRAINT `fk_Tournament_CaseName`
+    FOREIGN KEY (`year` , `level`)
+    REFERENCES `project2`.`CaseNames` (`year` , `level`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 DROP TABLE IF EXISTS `project2`.`TeamInfo` ;
 CREATE TABLE IF NOT EXISTS `project2`.`TeamInfo` (
   `team_num` SMALLINT NOT NULL,
   `year` INT NOT NULL,
-  `team_name` VARCHAR(45) NULL,
-  `tpr_rank` TINYINT NULL,
-  `tpr_points` TINYINT NULL,
-  `school` VARCHAR(45) NULL,
+  `team_name` VARCHAR(75) NULL,
+  `tpr_rank` SMALLINT NULL,
+  `tpr_points` DECIMAL(5,2) NULL,
+  `school` VARCHAR(75) NULL,
   PRIMARY KEY (`team_num`, `year`))
 ENGINE = InnoDB;
 
-DROP TABLE IF EXISTS TeamTournamentResults;
-CREATE TABLE IF NOT EXISTS TeamTournamentResults (
+DROP TABLE IF EXISTS `project2`.`TeamTournamentResults`;
+CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
   `tournament_id` INT UNSIGNED NOT NULL,
   `team_num` SMALLINT NOT NULL,
   `won_SPAMTA` BOOLEAN NULL,
@@ -313,33 +326,33 @@ CREATE TABLE IF NOT EXISTS TeamTournamentResults (
   PRIMARY KEY (`tournament_id`, `team_num`),
   INDEX `fk_TeamName_team_num_idx` (`team_num` ASC),
   INDEX `fk_Team_Tournament1_idx` (`tournament_id` ASC),
-/*  CONSTRAINT `fk_TeamName_team_num`
+  CONSTRAINT `fk_TeamName_team_num`
     FOREIGN KEY (`team_num`)
     REFERENCES `project2`.`TeamInfo` (`team_num`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,*/
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Team_Tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `project2`.`Tournament` (`tournament_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+    ON UPDATE NO ACTION) ENGINE = InnoDB;
     
 DROP TABLE IF EXISTS `project2`.`Student` ;
 CREATE TABLE IF NOT EXISTS `project2`.`Student` (
   `student_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tournament_id` INT NOT NULL,
-  `team_num` INT NOT NULL,
+  `team_num` SMALLINT NOT NULL,
   `student` VARCHAR(1000) NOT NULL,
   `role` VARCHAR(8) NOT NULL,
   `ranks` TINYINT UNSIGNED NOT NULL,
   `side` VARCHAR(8) NOT NULL,
   PRIMARY KEY (`student_id`, `tournament_id`, `team_num`),
-  INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC)
---   CONSTRAINT `fk_Student_Team1`
---     FOREIGN KEY (`team_num`)
---     REFERENCES `project2`.`TeamTournamentResults` (`team_num`)
---     ON DELETE NO ACTION
---     ON UPDATE NO ACTION
+  INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC),
+  CONSTRAINT `fk_Student_Team1`
+    FOREIGN KEY (`team_num`)
+    REFERENCES `project2`.`teamtournamentresults` (`team_num`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
 ) ENGINE = InnoDB;
 
 
@@ -378,7 +391,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`Matchup` (
     FOREIGN KEY (`tournament_id` , `def_num`)
     REFERENCES `project2`.`TeamTournamentResults` (`tournament_id` , `team_num`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+    ON UPDATE NO ACTION) ENGINE = InnoDB;
 
 
 DROP TABLE IF EXISTS `project2`.`Ballot` ;
@@ -396,42 +409,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
     FOREIGN KEY (`Matchup_tournament_id` , `Matchup_pl_num` , `Matchup_round_num`)
     REFERENCES `project2`.`Matchup` (`tournament_id` , `pl_num` , `round_num`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
-
-
-DROP TABLE IF EXISTS `project2`.`CaseDetails` ;
-
-CREATE TABLE IF NOT EXISTS `project2`.`CaseDetails` (
-  `case_name` VARCHAR(45) NOT NULL,
-  `full_case` VARCHAR(45) NULL,
-  `nationals_case` VARCHAR(45) NULL,
-  `type_charge` VARCHAR(45) NULL,
-  PRIMARY KEY (`case_name`),
-  CONSTRAINT `fk_CaseName_CaseDetails`
-    FOREIGN KEY (`case_name`)
-    REFERENCES `project2`.`CaseNames` (`case_name`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
-
-
-DROP TABLE IF EXISTS `project2`.`CaseComponents` ;
-
-CREATE TABLE IF NOT EXISTS `project2`.`CaseComponents` (
-  `case_name` VARCHAR(45) NOT NULL,
-  `n_key` TINYINT NOT NULL,
-  `charge` VARCHAR(45) NULL,
-  `witness_name` VARCHAR(45) NULL,
-  `exhibit_name` VARCHAR(45) NULL,
-  `exhibit_url` VARCHAR(152) NULL,
-  PRIMARY KEY (`case_name`, `n_key`),
-  UNIQUE INDEX `witness_name_UNIQUE` (`witness_name` ASC),
-  INDEX `exhibit_name` (`exhibit_name` ASC),
-  CONSTRAINT `fk_CaseDetails_CaseComponents`
-    FOREIGN KEY (`case_name`)
-    REFERENCES `project2`.`CaseDetails` (`case_name`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
-
+    ON UPDATE NO ACTION) ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `project2`.`WitnessDetails`
@@ -442,24 +420,59 @@ CREATE TABLE IF NOT EXISTS `project2`.`WitnessDetails` (
   `witness_name` VARCHAR(45) NOT NULL,
   `witness_type` VARCHAR(45) NULL,
   `witness_side` VARCHAR(8) NULL,
-  `witness_affidaivit` VARCHAR(45) NULL,
+  `witness_affidaivit` VARCHAR(152) NULL,
   INDEX `fk_WitnessDetails_CaseComponents_idx` (`witness_name` ASC),
-  PRIMARY KEY (`witness_name`),
+  PRIMARY KEY (`witness_name`)
+  ) ENGINE = InnoDB;
+-- -----------------------------------------------------
+-- Table `project2`.`CaseComponents`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `project2`.`CaseComponents` ;
+
+CREATE TABLE IF NOT EXISTS `project2`.`CaseComponents` (
+  `case_name` VARCHAR(75) NOT NULL,
+  `n_key` TINYINT NOT NULL,
+  `charge` VARCHAR(45) NULL,
+  `witness_name` VARCHAR(45) NULL,
+  `exhibit_name` VARCHAR(75) NULL,
+  PRIMARY KEY (`case_name`, `n_key`),
+  INDEX `exhibit_name` (`exhibit_name` ASC),
+  CONSTRAINT `fk_CaseDetails_CaseComponents`
+    FOREIGN KEY (`case_name`)
+    REFERENCES `project2`.`CaseDetails` (`case_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
   CONSTRAINT `fk_WitnessDetails_CaseComponents`
     FOREIGN KEY (`witness_name`)
-    REFERENCES `project2`.`CaseComponents` (`witness_name`)
+    REFERENCES `project2`.`WitnessDetails` (`witness_name`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ExhibitDetails_CaseComponents`
+	FOREIGN KEY (`exhibit_name`)
+    REFERENCES `project2`.`ExhibitDetails` (`exhibit_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+-- -----------------------------------------------------
+-- Table `project2`.`ExhibitDetails`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `project2`.`ExhibitDetails` ;
 
-
-DROP TABLE IF EXISTS `project2`.`Exhibit Details` ;
-
-CREATE TABLE IF NOT EXISTS `project2`.`Exhibit Details` (
-  `exhibit_name` VARCHAR(45) NOT NULL,
-  `exhibit_url` VARCHAR(152) NOT NULL,
+CREATE TABLE IF NOT EXISTS `project2`.`ExhibitDetails` (
+  `exhibit_name` VARCHAR(75) NOT NULL,
+  `exhibit_url` VARCHAR(134) NOT NULL,
   INDEX `fk_case_components_exhibit_idx` (`exhibit_name` ASC),
-  PRIMARY KEY (`exhibit_name`));
+  PRIMARY KEY (`exhibit_name`)) ENGINE = InnoDB;
 
+INSERT INTO CaseDetails
+	SELECT DISTINCT case_name, full_case, IF(LOWER(nationals_case) = 'true', 1, 0), case_type 
+		FROM megatable
+	WHERE full_case <> '';
+
+INSERT INTO CaseNames
+	SELECT DISTINCT tournament_year, tournament_level, case_name
+		FROM megatable
+	WHERE case_name <> '';
 
 INSERT INTO Tournament (name, division, start_date, end_date, host, location, bid_start_date, bid_end_date, bid_location, level, year)
 	SELECT DISTINCT tournament_name AS name, division, start_date, end_date, tournament_host AS host, location, bid_start_date, bid_end_date, bid_location, tournament_level AS level, tournament_year AS year
@@ -559,6 +572,10 @@ UPDATE Tournament T
 SET T.number_of_bids = R.number_of_bids
 WHERE R.number_of_bids > 0;
 
+INSERT INTO TeamInfo
+	SELECT DISTINCT team_num, tournament_year, team_name, tpr_rank, tpr_points, school
+		FROM megatable WHERE school <> '';
+
 INSERT INTO TeamTournamentResults
 	SELECT DISTINCT tournament_id, team_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
 		FROM megatable;
@@ -645,3 +662,222 @@ INSERT INTO Ballot
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
 		FROM megatable;
+        
+SELECT round_num FROM megatable ORDER BY round_num DESC;
+
+DROP PROCEDURE IF EXISTS insert_witness_details;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_witness_details()
+BEGIN
+	DECLARE iter INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    SET iter = 1;
+    
+    WHILE iter <= 12 DO
+    BEGIN
+		SELECT CONCAT('INSERT INTO WitnessDetails SELECT DISTINCT witness_', iter, '_name, witness_', iter, '_type, ',
+					'witness_', iter, '_side, witness_', iter, '_affidavit FROM megatable WHERE witness_', iter, '_name <> ""') INTO @sql_str;
+		PREPARE statement FROM @sql_str;
+        EXECUTE statement;
+        
+        SET iter = iter + 1;
+	END;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+
+CALL insert_witness_details();
+
+/* 
+	This is necessary because case components has a FK on WitnessDetails but not all case components
+    will have an entry for all 12 witness slots.
+*/
+INSERT INTO WitnessDetails
+	VALUES('','','','');
+
+DROP TABLE IF EXISTS TmpExhibitDetails;
+CREATE TABLE TmpExhibitDetails(
+	exhibit_name VARCHAR(75),
+    exhibit_url VARCHAR(152)
+) ENGINE InnoDB;
+
+DROP PROCEDURE IF EXISTS insert_tmp_exhibit_details;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_tmp_exhibit_details()
+BEGIN
+	DECLARE iter INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    SET iter = 1;
+    
+    WHILE iter <= 31 DO
+    BEGIN
+		SELECT CONCAT('INSERT INTO TmpExhibitDetails SELECT DISTINCT exhibit_', iter, '_name, ',
+					'exhibit_', iter, '_url FROM megatable WHERE exhibit_', iter, '_name <> "" ',
+                    'AND exhibit_', iter, '_url <> ""') INTO @sql_str;
+		PREPARE statement FROM @sql_str;
+        EXECUTE statement;
+        
+        SET iter = iter + 1;
+	END;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+CALL insert_tmp_exhibit_details();
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE TmpExhibitDetails
+	SET exhibit_name = 'Notice and Waiver of Miranda Rights v1'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/secure-17-18%20Ex2%20Miranda%20Waiver.pdf';
+    
+UPDATE TmpExhibitDetails
+	SET exhibit_name = 'Notice and Waiver of Miranda Rights v2'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/secure-17-18%20Ex2%20Miranda%20Waiver.pdf';
+    
+UPDATE TmpExhibitDetails
+	SET exhibit_name = 'Email v1'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/Ex%2016.pdf';
+    
+UPDATE TmpExhibitDetails
+	SET exhibit_name = 'Email v2'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/Ex%2017.pdf';
+SET SQL_SAFE_UPDATES = 1;
+
+INSERT INTO ExhibitDetails
+	SELECT * FROM TmpExhibitDetails;
+
+DROP TABLE IF EXISTS tmp_case_components;
+CREATE TABLE tmp_case_components(
+	case_name VARCHAR(75),
+    n_key TINYINT(4),
+    charge VARCHAR(45),
+    witness_name VARCHAR(45),
+    exhibit_name VARCHAR(75),
+    exhibit_url VARCHAR(152)
+) ENGINE InnoDB;
+
+DROP PROCEDURE IF EXISTS insert_case_components_charge3;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_case_components_charge3()
+BEGIN
+	DECLARE iter INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    SET iter = 1;
+    
+    WHILE iter <= 3 DO
+    BEGIN
+		SELECT CONCAT('INSERT INTO tmp_case_components SELECT DISTINCT case_name, ', iter, ' AS n_key, ',
+					'charge_', iter, ', witness_', iter, '_name, exhibit_', iter, '_name, ',
+                    'exhibit_', iter, '_url FROM megatable WHERE exhibit_', iter, '_name <> "" ',
+                    'AND exhibit_', iter, '_url <> "" AND case_name <> ""') INTO @sql_str;
+		PREPARE statement FROM @sql_str;
+        EXECUTE statement;
+        
+        SET iter = iter + 1;
+	END;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+
+CALL insert_case_components_charge3();
+
+DROP PROCEDURE IF EXISTS insert_case_components_witness12;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_case_components_witness12()
+BEGIN
+	DECLARE iter INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    -- Already put in the first 3 witnesses in the previous procedure
+    SET iter = 4;
+    
+    WHILE iter <= 12 DO
+    BEGIN
+		SELECT CONCAT('INSERT INTO tmp_case_components SELECT DISTINCT case_name, ', iter, ' AS n_key, ',
+					'"" AS charge, witness_', iter, '_name, exhibit_', iter, '_name, ',
+                    'exhibit_', iter, '_url FROM megatable WHERE exhibit_', iter, '_name <> "" ',
+                    'AND exhibit_', iter, '_url <> "" AND case_name <> ""') INTO @sql_str;
+		PREPARE statement FROM @sql_str;
+        EXECUTE statement;
+        
+        SET iter = iter + 1;
+	END;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+
+CALL insert_case_components_witness12();
+
+DROP PROCEDURE IF EXISTS insert_case_components_exhibit31;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_case_components_exhibit31()
+BEGIN
+	DECLARE iter INT;
+    DECLARE sql_str VARCHAR(1000);
+    
+    -- Already put in the first 12 exhibits in the previous procedures
+    SET iter = 13;
+    
+    WHILE iter <= 31 DO
+    BEGIN
+		SELECT CONCAT('INSERT INTO tmp_case_components SELECT DISTINCT case_name, ', iter, ' AS n_key, ',
+					'"" AS charge, "" AS witness_name, exhibit_', iter, '_name, ',
+                    'exhibit_', iter, '_url FROM megatable WHERE exhibit_', iter, '_name <> "" ',
+                    'AND exhibit_', iter, '_url <> "" AND case_name <> ""') INTO @sql_str;
+		PREPARE statement FROM @sql_str;
+        EXECUTE statement;
+        
+        SET iter = iter + 1;
+	END;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+
+CALL insert_case_components_exhibit31();
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE tmp_case_components
+	SET exhibit_name = 'Notice and Waiver of Miranda Rights v1'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/secure-17-18%20Ex2%20Miranda%20Waiver.pdf';
+    
+UPDATE tmp_case_components
+	SET exhibit_name = 'Notice and Waiver of Miranda Rights v2'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/secure-17-18%20Ex2%20Miranda%20Waiver.pdf';
+    
+UPDATE tmp_case_components
+	SET exhibit_name = 'Email v1'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/Ex%2016.pdf';
+    
+UPDATE tmp_case_components
+	SET exhibit_name = 'Email v2'
+    WHERE exhibit_url = 'http://www.collegemocktrial.org/Ex%2017.pdf';
+SET SQL_SAFE_UPDATES = 1;
+
+INSERT INTO casecomponents
+	SELECT case_name, n_key, charge, witness_name, exhibit_name
+		FROM tmp_case_components;
+        
+DROP TABLE tmpexhibitdetails;
+DROP TABLE tmp_case_components;
