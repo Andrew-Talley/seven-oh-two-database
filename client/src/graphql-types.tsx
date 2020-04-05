@@ -110,7 +110,11 @@ export type GetSingleTournamentViewQuery = (
     & Pick<Tournament, 'name' | 'start' | 'end' | 'host'>
     & { teams: Array<(
       { __typename?: 'TournamentTeamData' }
-      & Pick<TournamentTeamData, 'wins' | 'ties' | 'losses'>
+      & Pick<TournamentTeamData, 'wins' | 'ties' | 'losses' | 'totalCS' | 'totalOCS' | 'totalPD'>
+      & { team: (
+        { __typename?: 'Team' }
+        & Pick<Team, 'num'>
+      ) }
     )> }
   )> }
 );
@@ -195,9 +199,15 @@ export const GetSingleTournamentViewDocument = gql`
     end
     host
     teams {
+      team {
+        num
+      }
       wins
       ties
       losses
+      totalCS
+      totalOCS
+      totalPD
     }
   }
 }

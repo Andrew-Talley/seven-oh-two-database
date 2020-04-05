@@ -1,0 +1,24 @@
+.stats-category {
+  h1 {
+    grid-area: title;
+  }
+  p {
+    grid-area: description;
+  }
+
+  img {
+    width: 100%;
+    grid-area: img;
+  }
+
+  @media screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas: "title img"
+                         "description img";
+    column-gap: 2em;
+  }
+  @media screen and (min-width: 992px) {
+    grid-template-columns: 3fr 1fr;
+  }
+}

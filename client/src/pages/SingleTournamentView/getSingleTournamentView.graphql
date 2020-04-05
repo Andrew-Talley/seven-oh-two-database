@@ -6,13 +6,18 @@ query getSingleTournamentView($id: Int) {
     host
     
     teams {
+      team {
+        num
+        name
+      }
+
       wins
       ties
       losses
 
-      cs
-      ocs
-      pd
+      totalCS
+      totalOCS
+      totalPD
     }
   }
 }

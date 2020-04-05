@@ -3,6 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var DashboardPlugin = require("webpack-dashboard/plugin");
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 require("babel-polyfill");
 
 module.exports = {
@@ -70,7 +71,11 @@ module.exports = {
 			template: 'index.html',
 			filename: 'index.html'
 		}),
-		new CleanWebpackPlugin()
+		new CleanWebpackPlugin(),
+		new CopyWebpackPlugin([{
+			'from': '../assets',
+			'to': '../wwwroot/assets'
+		}])
 	],
 	externals: {
 		config: JSON.stringify({
