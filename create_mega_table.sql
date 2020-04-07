@@ -198,7 +198,7 @@ CREATE TABLE megatable(
     PRIMARY KEY(ballot_id)
 );
 
-LOAD DATA INFILE '~/Google Drive/College Work/Junior/Spring/Databases/full-data.csv'
+LOAD DATA INFILE 'C:\\wamp64\\tmp\\full-data.csv'
 	IGNORE
 	INTO TABLE megatable
 	FIELDS TERMINATED BY ','
@@ -387,14 +387,14 @@ DROP TABLE IF EXISTS `project2`.`Matchup` ;
 
 CREATE TABLE IF NOT EXISTS `project2`.`Matchup` (
   `tournament_id` INT UNSIGNED NOT NULL,
-  `pl_num` SMALLINT NOT NULL,
+  `pi_num` SMALLINT NOT NULL,
   `round_num` SMALLINT NOT NULL,
   `def_num` SMALLINT NOT NULL,
-  PRIMARY KEY (`pl_num`, `round_num`, `tournament_id`),
-  INDEX `fk_Matchup_Team1_idx` (`tournament_id` ASC, `pl_num` ASC),
+  PRIMARY KEY (`pi_num`, `round_num`, `tournament_id`),
+  INDEX `fk_Matchup_Team1_idx` (`tournament_id` ASC, `pi_num` ASC),
   INDEX `fk_TeamTournamentResults_def_idx` (`tournament_id` ASC, `def_num` ASC),
-  CONSTRAINT `fk_TeamTournamentResults_pl`
-    FOREIGN KEY (`tournament_id` , `pl_num`)
+  CONSTRAINT `fk_TeamTournamentResults_pi`
+    FOREIGN KEY (`tournament_id` , `pi_num`)
     REFERENCES `project2`.`TeamTournamentResults` (`tournament_id` , `team_num`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
@@ -414,15 +414,15 @@ DROP TABLE IF EXISTS `project2`.`Ballot` ;
 CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
   `ballot_id` INT NOT NULL,
   `Matchup_tournament_id` INT UNSIGNED NOT NULL,
-  `Matchup_pl_num` SMALLINT NOT NULL,
+  `Matchup_pi_num` SMALLINT NOT NULL,
   `Matchup_round_num` SMALLINT NOT NULL,
   `pd` SMALLINT NOT NULL,
   `ballot_result` CHAR(1) NOT NULL,
   PRIMARY KEY (`ballot_id`),
-  INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pl_num` ASC, `Matchup_round_num` ASC),
+  INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pi_num` ASC, `Matchup_round_num` ASC),
   CONSTRAINT `fk_Ballot_Matchup1`
-    FOREIGN KEY (`Matchup_tournament_id` , `Matchup_pl_num` , `Matchup_round_num`)
-    REFERENCES `project2`.`Matchup` (`tournament_id` , `pl_num` , `round_num`)
+    FOREIGN KEY (`Matchup_tournament_id` , `Matchup_pi_num` , `Matchup_round_num`)
+    REFERENCES `project2`.`Matchup` (`tournament_id` , `pi_num` , `round_num`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -931,3 +931,80 @@ SELECT DISTINCT exhibit_name, LENGTH(exhibit_name) AS 'len' FROM TmpExhibitDetai
         
 DROP TABLE tmpexhibitdetails;
 DROP TABLE tmp_case_components;
+
+DROP VIEW IF EXISTS TeamTotalPD;
+CREATE VIEW TeamTotalPD AS
+SELECT tournament_id, pi_num, SUM(pd) AS totalPD
+FROM Matchup m
+	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
+						AND b.matchup_pi_num = m.pi_num
+						AND b.matchup_round_num = m.round_num
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TeamTotalWins;
+CREATE VIEW TeamTotalWins AS
+SELECT tournament_id, pi_num, COUNT(pd) AS wins
+FROM Matchup m
+	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
+						AND b.matchup_pi_num = m.pi_num
+						AND b.matchup_round_num = m.round_num
+WHERE pd > 0
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TeamTotalTies;
+CREATE VIEW TeamTotalTies AS
+SELECT tournament_id, pi_num, COUNT(pd) AS ties
+FROM Matchup m
+	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
+						AND b.matchup_pi_num = m.pi_num
+						AND b.matchup_round_num = m.round_num
+WHERE pd = 0
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TeamTotalLosses;
+CREATE VIEW TeamTotalLosses AS
+SELECT tournament_id, pi_num, COUNT(pd) AS losses
+FROM Matchup m
+	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
+						AND b.matchup_pi_num = m.pi_num
+						AND b.matchup_round_num = m.round_num
+WHERE pd < 0
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TeamTournamentRecord;
+CREATE VIEW TeamTournamentRecord AS
+SELECT w.tournament_id, w.pi_num, wins, ties, losses
+FROM TeamTotalWins w
+	INNER JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.pi_num = t.pi_num
+    INNER JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.pi_num = l.pi_num;
+        
+DROP VIEW IF EXISTS TeamTournamentBallots;
+CREATE VIEW TeamTournamentBallots AS
+SELECT tournament_id, pi_num, SUM(wins) + (0.5 * SUM(ties)) AS ballots
+FROM TeamTournamentRecord
+GROUP BY tournament_id, pi_num;
+
+DROP VIEW IF EXISTS TeamTournamentCS;
+CREATE VIEW TeamTournamentCS AS
+SELECT m.tournament_id, m.pi_num, SUM(b.ballots) AS totalCS
+FROM Matchup m
+	INNER JOIN TeamTournamentBallots b ON m.tournament_id = b.tournament_id AND m.def_num = b.pi_num
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TeamTournamentOCS;
+CREATE VIEW TeamTournamentOCS AS
+SELECT m.tournament_id, m.pi_num, SUM(c.totalCS) AS totalOCS
+FROM Matchup m
+	INNER JOIN TeamTournamentCS c ON m.tournament_id = c.tournament_id AND m.def_num = c.pi_num
+GROUP BY m.tournament_id, m.pi_num;
+
+DROP VIEW IF EXISTS TournamentTeamInfo;
+CREATE VIEW TournamentTeamInfo AS
+SELECT o.tournament_id, c.pi_num AS team_num, r.wins, r.ties, r.losses, p.totalPD, c.totalCS, o.totalOCS, t.year
+FROM TeamTournamentOCS o
+	INNER JOIN TeamTournamentCS c ON o.tournament_id = c.tournament_id AND o.pi_num = c.pi_num
+    INNER JOIN TeamTotalPD p ON p.tournament_id = o.tournament_id AND p.pi_num = o.pi_num
+    INNER JOIN TeamTournamentRecord r ON o.tournament_id = r.tournament_id AND o.pi_num = r.pi_num
+    INNER JOIN Tournament t ON o.tournament_id = t.tournament_id;
+    
+SELECT * FROM TournamentTeamInfo;
