@@ -28,8 +28,6 @@ namespace server
                 options.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            services.AddApiVersioning();
-
             services.AddSingleton(SchemaBuilder.FromObject<MockTrialContext>());
         }
 

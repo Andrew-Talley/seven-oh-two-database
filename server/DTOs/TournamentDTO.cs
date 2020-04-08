@@ -8,6 +8,7 @@ namespace MockTrial.DTOs
     {
         public int tournament_id { get; set; }
 
+        [Column("name")]
         public string tournament_name { get; set; }
 
         public string division { get; set; }
@@ -30,12 +31,9 @@ namespace MockTrial.DTOs
 
         public string bid_location { get; set; }
 
-        public string third_coin_flip { get; set; }
-
         public string level { get; set; }
-
-        [Column("7th_place_after_r3")]
-        public string seventh_place_after_r3 { get; set; }
+        
+        public string bids_plus_one_after_r3 { get; set; }
 
         public int number_of_bids { get; set; }
 

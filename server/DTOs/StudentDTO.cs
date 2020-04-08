@@ -12,6 +12,7 @@ namespace MockTrial.DTOs
 
         public int team_num { get; set; }
 
+        [Column("student")]
         public string student_name { get; set; }
 
         public string role { get; set; }

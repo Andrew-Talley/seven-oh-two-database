@@ -4,30 +4,30 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MockTrial.DTOs
 {
-    public class TeamDTO
+    public class TournamentTeamInfoDTO
     {
         public int tournament_id { get; set; }
 
         public int team_num { get; set; }
 
+        [Column("wins")]
         public int total_wins { get; set; }
 
+        [Column("ties")]
         public int total_ties { get; set; }
 
+        [Column("losses")]
         public int total_losses { get; set; }
 
-        public int won_SPAMTA { get; set; }
-
-        public int SPAMTA_honorable_mention { get; set; }
-
-        public int SPAMTA_ranks { get; set; }
-
+        [Column("totalCS")]
         public int total_cs { get; set; }
 
+        [Column("totalOCS")]
         public int total_ocs { get; set; }
 
+        [Column("totalPD")]
         public int total_pd { get; set; }
 
-        public int rank { get; set; }
+        public int year { get; set; }
     }
 }

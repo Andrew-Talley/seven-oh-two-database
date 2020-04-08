@@ -8,14 +8,17 @@ namespace MockTrial.DTOs
     {
         public int ballot_id { get; set; }
 
+        [Column("Matchup_tournament_id")]
         public int tournament_id { get; set; }
 
-        public int pl_num { get; set; }
+        [Column("Matchup_pi_num")]
+        public int pi_num { get; set; }
 
+        [Column("Matchup_round_num")]
         public int round_num { get; set; }
 
         public int pd { get; set; }
 
-        public char ballot_result { get; set; }
+        public string ballot_result { get; set; }
     }
 }

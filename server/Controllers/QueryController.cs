@@ -3,6 +3,7 @@ using MockTrial.DTOs;
 using MockTrial.Data;
 using MockTrial.Models;
 using System;
+using System.Linq;
 using System.Net;
 using EntityGraphQL;
 using EntityGraphQL.Schema;
@@ -10,7 +11,7 @@ using EntityGraphQL.Schema;
 namespace MockTrial.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class QueryController : ControllerBase
     {
         private readonly MockTrialContext _context;
@@ -27,11 +28,8 @@ namespace MockTrial.Controllers
             try
             {
                 var result = _schemaProvider.ExecuteQuery(query, _context, null, null);
-                if(result.Errors.Count > 0)
-                {
-                    return BadRequest(result);
-                }
-                return Ok(result);
+                var foo = result.Data.Values.ToList();
+                return Ok(result.Data.Values.ToList());
             } catch (Exception e)
             {
                 return BadRequest(e);

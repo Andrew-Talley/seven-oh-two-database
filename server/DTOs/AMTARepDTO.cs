@@ -6,6 +6,7 @@ namespace MockTrial.DTOs
 {
     public class AMTARepDTO
     {
+        [Column("amta_rep_num")]
         public int amta_num { get; set; }
 
         public string amta_rep { get; set; }
