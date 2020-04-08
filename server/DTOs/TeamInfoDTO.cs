@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace MockTrial.DTOs
 {
@@ -17,5 +18,7 @@ namespace MockTrial.DTOs
         public double tpr_points { get; set; }
 
         public string school { get; set; }
+
+        public List<TeamTournamentResultsDTO> tournamentResults { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace MockTrial.Data
         public MockTrialContext(DbContextOptions<MockTrialContext> options) : base(options)
         {}
 
-        [Description()]
+        #region DbSet Declarations
         public DbSet<AMTARepDTO> amtaReps { get; set; }
         public DbSet<BallotDTO> ballots { get; set; }
         public DbSet<CaseComponentsDTO> caseComponents { get; set; }
@@ -23,10 +23,12 @@ namespace MockTrial.Data
         public DbSet<TournamentDTO> tournaments { get; set; }
         public DbSet<TournamentTeamInfoDTO> TournamentTeamData { get; set; }
         public DbSet<WitnessDetailsDTO> witnessDetails { get; set; }
+        #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Declare all of the primary keys
+            #region Primary Key Declarations
             modelBuilder.Entity<AMTARepDTO>().HasKey(a => new {a.amta_num, a.tournament_id});
             modelBuilder.Entity<BallotDTO>().HasKey(b => b.ballot_id);
             modelBuilder.Entity<CaseComponentsDTO>().HasKey(c => new {c.case_name, c.n_key});
@@ -40,8 +42,54 @@ namespace MockTrial.Data
             modelBuilder.Entity<TournamentDTO>().HasKey(t => t.tournament_id);
             modelBuilder.Entity<TournamentTeamInfoDTO>().HasKey(t => new {t.tournament_id, t.team_num, t.year});
             modelBuilder.Entity<WitnessDetailsDTO>().HasKey(w => w.name);
+            #endregion
 
+            // Declare all of the foreign keys
+            #region Foreign Key Declarations
+            modelBuilder.Entity<AMTARepDTO>()
+                .HasOne(a => a.tournament)
+                .WithMany(t => t.amtaReps)
+                .HasForeignKey(a => a.tournament_id);
+            modelBuilder.Entity<BallotDTO>()
+                .HasOne(b => b.matchup)
+                .WithMany(m => m.ballots)
+                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num});
+            modelBuilder.Entity<CaseComponentsDTO>()
+                .HasOne(cc => cc.caseDetails)
+                .WithMany(cd => cd.caseComponents)
+                .HasForeignKey(cc => cc.case_name);
+            modelBuilder.Entity<CaseNamesDTO>()
+                .HasOne<CaseDetailsDTO>(cn => cn.caseDetails)
+                .WithOne(cd => cd.caseName)
+                .HasForeignKey<CaseNamesDTO>(cn => cn.case_name);
+            modelBuilder.Entity<ExhibitDetailsDTO>()
+                .HasOne<CaseComponentsDTO>(e => e.caseComponents)
+                .WithOne(c => c.exhibitDetails)
+                .HasForeignKey<ExhibitDetailsDTO>(e => e.exhibit_url);
+            modelBuilder.Entity<MatchupDTO>()
+                .HasOne(m => m.teamTournamentResults)
+                .WithMany(t => t.matchups)
+                .HasForeignKey(m => m.tournament_id);
+            modelBuilder.Entity<StudentDTO>()
+                .HasOne(s => s.teamTournamentResults)
+                .WithMany(t => t.students)
+                .HasForeignKey(s => new {s.tournament_id, s.team_num});
+            modelBuilder.Entity<TeamTournamentResultsDTO>()
+                .HasOne(tr => tr.tournament)
+                .WithMany(t => t.tournamentResults)
+                .HasForeignKey(tr => tr.tournament_id);
+            modelBuilder.Entity<TeamTournamentResultsDTO>()
+                .HasOne(tr => tr.teamInfo)
+                .WithMany(ti => ti.tournamentResults)
+                .HasForeignKey(tr => new {tr.team_num, tr.tournament.year});
+            modelBuilder.Entity<WitnessDetailsDTO>()
+                .HasOne<CaseComponentsDTO>(w => w.caseComponents)
+                .WithOne(c => c.witness)
+                .HasForeignKey<WitnessDetailsDTO>(w => w.name);
+            #endregion
 
+            // Declare the table names for each of our DTOs
+            #region Table Declarations
             modelBuilder.Entity<AMTARepDTO>().ToTable("amtarep");
             modelBuilder.Entity<BallotDTO>().ToTable("ballot");
             modelBuilder.Entity<CaseComponentsDTO>().ToTable("casecomponents");
@@ -54,6 +102,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<TeamTournamentResultsDTO>().ToTable("teamtournamentresults");
             modelBuilder.Entity<TournamentDTO>().ToTable("tournament");
             modelBuilder.Entity<WitnessDetailsDTO>().ToTable("witnessdetails");
+            #endregion
         }
     }
 }

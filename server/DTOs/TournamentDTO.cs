@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace MockTrial.DTOs
 {
@@ -38,5 +39,9 @@ namespace MockTrial.DTOs
         public int number_of_bids { get; set; }
 
         public int year { get; set; }
+
+        public List<AMTARepDTO> amtaReps { get; set; }
+
+        public List<TeamTournamentResultsDTO> tournamentResults { get; set; }
     }
 }

@@ -20,5 +20,7 @@ namespace MockTrial.DTOs
         public int ranks { get; set; }
 
         public string side { get; set; }
+
+        public TeamTournamentResultsDTO teamTournamentResults { get; set; }
     }   
 }

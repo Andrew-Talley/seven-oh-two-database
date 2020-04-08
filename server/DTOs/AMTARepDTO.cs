@@ -12,5 +12,7 @@ namespace MockTrial.DTOs
         public string amta_rep { get; set; }
 
         public int tournament_id { get; set; }
+
+        public TournamentDTO tournament { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace MockTrial.DTOs
 {
@@ -13,5 +14,9 @@ namespace MockTrial.DTOs
         public int nationals_case { get; set; }
 
         public string type_charge { get; set; }
+
+        public CaseNamesDTO caseName { get; set; }
+
+        public List<CaseComponentsDTO> caseComponents { get; set; }
     }
 }

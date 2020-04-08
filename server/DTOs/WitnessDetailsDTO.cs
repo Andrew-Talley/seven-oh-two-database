@@ -17,5 +17,7 @@ namespace MockTrial.DTOs
 
         [Column("witness_affidaivit")]
         public string affidaivit { get; set; }
+
+        public CaseComponentsDTO caseComponents { get; set; }
     }
 }

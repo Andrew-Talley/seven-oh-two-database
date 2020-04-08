@@ -15,5 +15,11 @@ namespace MockTrial.DTOs
         public string witness_name { get; set; }
 
         public string exhibit_url { get; set; }
+
+        public CaseDetailsDTO caseDetails { get; set; }
+
+        public ExhibitDetailsDTO exhibitDetails { get; set; }
+
+        public WitnessDetailsDTO witness { get; set; }
     }
 }

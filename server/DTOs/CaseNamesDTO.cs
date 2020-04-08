@@ -11,5 +11,7 @@ namespace MockTrial.DTOs
         public string level { get; set; }
 
         public string case_name { get; set; }
+
+        public CaseDetailsDTO caseDetails { get; set; }
     }
 }
