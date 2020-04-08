@@ -6,7 +6,6 @@ using MockTrial.Data;
 using Microsoft.EntityFrameworkCore;
 using MockTrial.Helpers;
 using System.Text;
-using EntityGraphQL.Schema;
 
 namespace server
 {
@@ -27,8 +26,6 @@ namespace server
             services.AddDbContext<MockTrialContext>(options => {
                 options.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
             });
-
-            services.AddSingleton(SchemaBuilder.FromObject<MockTrialContext>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
