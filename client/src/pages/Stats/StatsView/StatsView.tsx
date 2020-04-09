@@ -22,13 +22,13 @@ export const StatsView: React.FC = () => {
           <p className="lead">Find some of the best (and worst) the last few years of mock trial has to offer</p>
         </Jumbotron>
       </Link>
-      <Link to="/stats/tpr">
+      {/* <Link to="/stats/tpr">
         <Jumbotron className="stats-category">
           <h1 className="display-4">TPR Metrics</h1>
           <img src="" />
           <p className="lead">See how teams fare based on TPR</p>
         </Jumbotron>
-      </Link>
+      </Link> */}
     </React.Fragment>
   )
 }
