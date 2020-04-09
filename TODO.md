@@ -9,10 +9,11 @@
     - [ ] Show how often teams beat each other in R1 by TPR group
     - [ ] Show how often teams got bids by TPR group this year vs. past years
   - Superlatives
-    - [ ] Largest single-round PD (by average PD across ballots)
-    - [ ] Largest single-ballot PD
-    - [ ] Best record at an AMTA tournament
-    - [ ] Worst record at an AMTA tournament
+    - [X] Largest single-round PD (by average PD across ballots)
+    - [X] Largest single-ballot PD
+    - [X] Best record at an AMTA tournament
+    - [X] Worst record at an AMTA tournament
+    - [ ] Link all to endpoint
 
 ## Server Side:
 - [ ] Create endpoints for tournament views
