@@ -50,5 +50,69 @@ namespace MockTrial.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> getTournament(int id)
+        {
+            try {
+                var ttr = await _context.teamTournamentResults
+                    .Include(ttr => ttr.matchups)
+                        .ThenInclude(m => m.ballots)
+                    .Where(ttr => ttr.tournament_id == id).ToListAsync();
+
+                foreach(var t in ttr)
+                {
+                    foreach(var m in t.matchups)
+                    {
+                        // IDK why but the server has cyclical inclusion of matchups -> ttr -> matchups -> ttr -> ...
+                        m.teamTournamentResults = null;
+                        foreach(var b in m.ballots)
+                        {
+                            // Same issue as above
+                            b.matchup = null;
+                        }
+                    }                    
+                }
+                
+                
+                var teamTournamentInfo = _context.TournamentTeamData.Where(t => t.tournament_id == id).ToList();
+                var year = teamTournamentInfo[0].year;
+                
+                var teams = await (from i in _context.teamInfos
+                            join t in ttr
+                                on i.team_num equals t.team_num
+                            join tti in teamTournamentInfo
+                                on i.team_num equals tti.team_num
+                            where i.year == year
+                            select new {
+                                num = i.team_num,
+                                name = i.team_name
+                            }).ToListAsync();
+
+                var ret = (from r in ttr
+                            join t in teams
+                                on r.team_num equals t.num
+                            join tti in teamTournamentInfo
+                                on t.num equals tti.team_num
+                            select new {
+                                teams = new {
+                                    team = t,
+                                    matchups = r.matchups,
+                                    wins = tti.total_wins,
+                                    ties = tti.total_ties,
+                                    losses = tti.total_losses,
+                                    CS = tti.total_cs,
+                                    OCS = tti.total_ocs,
+                                    PD = tti.total_pd
+                                }
+                            }).ToList();
+
+                return Ok(ret);
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

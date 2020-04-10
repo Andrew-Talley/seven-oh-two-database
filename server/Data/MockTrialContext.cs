@@ -50,10 +50,10 @@ namespace MockTrial.Data
                 .HasOne(a => a.tournament)
                 .WithMany(t => t.amtaReps)
                 .HasForeignKey(a => a.tournament_id);
-            modelBuilder.Entity<BallotDTO>()
+            /* modelBuilder.Entity<BallotDTO>()
                 .HasOne(b => b.matchup)
                 .WithMany(m => m.ballots)
-                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num});
+                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num}); */
             modelBuilder.Entity<CaseComponentsDTO>()
                 .HasOne(cc => cc.caseDetails)
                 .WithMany(cd => cd.caseComponents)
@@ -65,11 +65,18 @@ namespace MockTrial.Data
             modelBuilder.Entity<ExhibitDetailsDTO>()
                 .HasOne<CaseComponentsDTO>(e => e.caseComponents)
                 .WithOne(c => c.exhibitDetails)
-                .HasForeignKey<ExhibitDetailsDTO>(e => e.exhibit_url);
+                .HasForeignKey<ExhibitDetailsDTO>(e => e.exhibit_url)
+                .HasPrincipalKey<CaseComponentsDTO>(c => c.exhibit_url);
             modelBuilder.Entity<MatchupDTO>()
+                .HasMany(m => m.ballots)
+                .WithOne(b => b.matchup)
+                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num})
+                .HasPrincipalKey(m => new {m.tournament_id, m.pi_num, m.round_num});
+            /* modelBuilder.Entity<MatchupDTO>()
                 .HasOne(m => m.teamTournamentResults)
                 .WithMany(t => t.matchups)
-                .HasForeignKey(m => m.tournament_id);
+                .HasForeignKey(m => m.tournament_id)
+                .HasPrincipalKey(t => t.tournament_id); */
             modelBuilder.Entity<StudentDTO>()
                 .HasOne(s => s.teamTournamentResults)
                 .WithMany(t => t.students)
@@ -79,13 +86,15 @@ namespace MockTrial.Data
                 .WithMany(t => t.tournamentResults)
                 .HasForeignKey(tr => tr.tournament_id);
             modelBuilder.Entity<TeamTournamentResultsDTO>()
-                .HasOne(tr => tr.teamInfo)
-                .WithMany(ti => ti.tournamentResults)
-                .HasForeignKey(tr => new {tr.team_num, tr.tournament.year});
+                .HasMany(tr => tr.matchups)
+                .WithOne(m => m.teamTournamentResults)
+                .HasForeignKey(m => m.tournament_id)
+                .HasPrincipalKey(ttr => ttr.tournament_id);
             modelBuilder.Entity<WitnessDetailsDTO>()
                 .HasOne<CaseComponentsDTO>(w => w.caseComponents)
                 .WithOne(c => c.witness)
-                .HasForeignKey<WitnessDetailsDTO>(w => w.name);
+                .HasForeignKey<WitnessDetailsDTO>(w => w.name)
+                .HasPrincipalKey<CaseComponentsDTO>(c => c.witness_name);
             #endregion
 
             // Declare the table names for each of our DTOs
@@ -100,6 +109,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<StudentDTO>().ToTable("student");
             modelBuilder.Entity<TeamInfoDTO>().ToTable("teaminfo");
             modelBuilder.Entity<TeamTournamentResultsDTO>().ToTable("teamtournamentresults");
+            modelBuilder.Entity<TournamentTeamInfoDTO>().ToTable("tournamentteaminfo");
             modelBuilder.Entity<TournamentDTO>().ToTable("tournament");
             modelBuilder.Entity<WitnessDetailsDTO>().ToTable("witnessdetails");
             #endregion

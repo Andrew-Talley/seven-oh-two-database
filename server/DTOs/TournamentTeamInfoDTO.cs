@@ -20,13 +20,13 @@ namespace MockTrial.DTOs
         public int total_losses { get; set; }
 
         [Column("totalCS")]
-        public int total_cs { get; set; }
+        public float total_cs { get; set; }
 
         [Column("totalOCS")]
-        public int total_ocs { get; set; }
+        public float total_ocs { get; set; }
 
         [Column("totalPD")]
-        public int total_pd { get; set; }
+        public float total_pd { get; set; }
 
         public int year { get; set; }
     }

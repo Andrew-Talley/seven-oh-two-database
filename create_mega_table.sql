@@ -892,7 +892,7 @@ INSERT INTO ExhibitDetails
 SELECT * FROM CaseComponents;
     
 DROP PROCEDURE IF EXISTS insert_witness_details;
-
+SELECT * FROM amtarep;
 DELIMITER //
 
 CREATE PROCEDURE insert_witness_details()
@@ -973,10 +973,10 @@ GROUP BY m.tournament_id, m.pi_num;
 
 DROP VIEW IF EXISTS TeamTournamentRecord;
 CREATE VIEW TeamTournamentRecord AS
-SELECT w.tournament_id, w.pi_num, wins, ties, losses
+SELECT w.tournament_id, w.pi_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
 FROM TeamTotalWins w
-	INNER JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.pi_num = t.pi_num
-    INNER JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.pi_num = l.pi_num;
+	LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.pi_num = t.pi_num
+    LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.pi_num = l.pi_num;
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
@@ -1006,5 +1006,3 @@ FROM TeamTournamentOCS o
     INNER JOIN TeamTotalPD p ON p.tournament_id = o.tournament_id AND p.pi_num = o.pi_num
     INNER JOIN TeamTournamentRecord r ON o.tournament_id = r.tournament_id AND o.pi_num = r.pi_num
     INNER JOIN Tournament t ON o.tournament_id = t.tournament_id;
-    
-SELECT * FROM TournamentTeamInfo;
