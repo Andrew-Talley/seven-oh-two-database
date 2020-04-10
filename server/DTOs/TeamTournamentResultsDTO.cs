@@ -17,7 +17,7 @@ namespace MockTrial.DTOs
 
         public int? spamta_ranks { get; set; }
 
-        public List<MatchupDTO>? matchups { get; set; }
+        public List<MatchupDTO> matchups { get; set; }
 
         // public TeamInfoDTO teamInfo { get; set; }
 

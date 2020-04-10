@@ -76,7 +76,7 @@ namespace MockTrial.Controllers
                 }
                 
                 
-                var teamTournamentInfo = _context.TournamentTeamData.Where(t => t.tournament_id == id).ToList();
+                var teamTournamentInfo = await _context.TournamentTeamData.Where(t => t.tournament_id == id).ToListAsync();
                 var year = teamTournamentInfo[0].year;
                 
                 var teams = await (from i in _context.teamInfos
