@@ -19,8 +19,6 @@ namespace MockTrial.DTOs
 
         public int pd { get; set; }
 
-        public string ballot_result { get; set; }
-
         public MatchupDTO matchup { get; set; }
     }
 }

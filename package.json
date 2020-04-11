@@ -8,5 +8,9 @@
   },
   "scripts": {
     "codegen": "graphql-codegen --config codegen.yml"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "axios-hooks": "^1.9.0"
   }
 }

@@ -198,7 +198,7 @@ CREATE TABLE megatable(
     PRIMARY KEY(ballot_id)
 );
 
-LOAD DATA INFILE 'C:\\wamp64\\tmp\\full-data.csv'
+LOAD DATA INFILE '~/Google Drive/College Work/Junior/Spring/Databases/full-data.csv'
 	IGNORE
 	INTO TABLE megatable
 	FIELDS TERMINATED BY ','
@@ -212,7 +212,7 @@ DELETE FROM megatable
 	WHERE team_num = opp_num; # A team should never be playing itself – this means a team dropped out, so the tab shows them "playing themselves"
 
 DELETE FROM megatable
-	WHERE Side = "Δ";
+	WHERE Side = "∆";
     
 UPDATE megatable
 	SET start_date = NULL
@@ -337,7 +337,6 @@ CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
 -- Table `project2`.`Student`
 -- -----------------------------------------------------
@@ -417,7 +416,6 @@ CREATE TABLE IF NOT EXISTS `project2`.`Ballot` (
   `Matchup_pi_num` SMALLINT NOT NULL,
   `Matchup_round_num` SMALLINT NOT NULL,
   `pd` SMALLINT NOT NULL,
-  `ballot_result` CHAR(1) NOT NULL,
   PRIMARY KEY (`ballot_id`),
   INDEX `fk_Ballot_Matchup1_idx` (`Matchup_tournament_id` ASC, `Matchup_pi_num` ASC, `Matchup_round_num` ASC),
   CONSTRAINT `fk_Ballot_Matchup1`
@@ -499,7 +497,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`ExhibitDetails` (
   INDEX `fk_Exhibit Details_CaseComponents1_idx` (`exhibit_url` ASC))
 ENGINE = MyISAM;
 
-
+SELECT * FROM Tournament LIMIT 1;
 
 SELECT DISTINCT case_name, LENGTH(case_name)
 		FROM megatable
@@ -539,6 +537,9 @@ WHERE M.tournament_year != "";
 
 DELETE FROM megatable
 	WHERE tournament_id IS NULL;
+    
+DELETE FROM megatable
+	WHERE tournament_id = 235; -- This data seems very off
     
 DROP TABLE IF EXISTS TEMP_faulty_tournament_id;
 CREATE TABLE TEMP_faulty_tournament_id (
@@ -629,6 +630,14 @@ INSERT INTO TeamTournamentResults
 	SELECT DISTINCT tournament_id, team_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
 		FROM megatable;
 
+INSERT INTO TeamTournamentResults
+	SELECT DISTINCT tournament_id, opp_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
+		FROM megatable
+	WHERE (tournament_id, opp_num) NOT IN (
+		SELECT tournament_id, team_num
+			FROM TeamTournamentResults
+	);
+
 DROP PROCEDURE IF EXISTS insert_students;
 
 DELIMITER //
@@ -694,9 +703,9 @@ SELECT * FROM TeamTournamentResults;
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
 		FROM megatable;
-
+        
 INSERT INTO Ballot
-	SELECT ballot_id, tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd, LEFT(ballot__result, 1)
+	SELECT ballot_id, tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd
 		FROM megatable;
         
 SELECT round_num FROM megatable ORDER BY round_num DESC;
@@ -921,88 +930,177 @@ SET SQL_SAFE_UPDATES = 0;
 DELETE FROM WitnessDetails;
 SET SQL_SAFE_UPDATES = 1;
 
-SELECT DISTINCT witness_4_name FROM megatable 
-	WHERE witness_4_name NOT IN (SELECT witness_name FROM CaseComponents);
-
 CALL insert_witness_details();
-
     
 SELECT DISTINCT exhibit_name, LENGTH(exhibit_name) AS 'len' FROM TmpExhibitDetails;
         
 DROP TABLE tmpexhibitdetails;
 DROP TABLE tmp_case_components;
 
+SELECT * FROM Matchup LIMIT 1;
+
+SELECT DISTINCT side FROM megatable;
+
+DROP VIEW IF EXISTS BallotMatchupJoinView;
+CREATE VIEW BallotMatchupJoinView AS
+	SELECT B.ballot_id, M.tournament_id, M.pi_num, M.round_num, M.def_num, B.pd
+		FROM Ballot B
+			INNER JOIN Matchup M ON B.matchup_tournament_id = M.tournament_id
+								AND B.matchup_pi_num = M.pi_num
+                                AND B.matchup_round_num = M.round_num;
+                                
+DROP VIEW IF EXISTS DetailedBallotView;
+CREATE VIEW DetailedBallotView AS
+	SELECT ballot_id, tournament_id, round_num, pi_num AS team_num, def_num AS 'opp_num', pd, 'π' AS side
+		FROM BallotMatchupJoinView
+	UNION
+    SELECT ballot_id, tournament_id, round_num, def_num AS team_num, pi_num AS team_num, -pd AS 'pd', '∆' AS side
+		FROM BallotMatchupJoinView;
+
 DROP VIEW IF EXISTS TeamTotalPD;
 CREATE VIEW TeamTotalPD AS
-SELECT tournament_id, pi_num, SUM(pd) AS totalPD
-FROM Matchup m
-	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
-						AND b.matchup_pi_num = m.pi_num
-						AND b.matchup_round_num = m.round_num
-GROUP BY m.tournament_id, m.pi_num;
+	SELECT tournament_id, team_num, SUM(pd) AS totalPD
+		FROM DetailedBallotView
+	GROUP BY tournament_id, team_num;
+    
+SELECT * FROM BallotMatchupJoinView LIMIT 1;
 
 DROP VIEW IF EXISTS TeamTotalWins;
 CREATE VIEW TeamTotalWins AS
-SELECT tournament_id, pi_num, COUNT(pd) AS wins
-FROM Matchup m
-	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
-						AND b.matchup_pi_num = m.pi_num
-						AND b.matchup_round_num = m.round_num
-WHERE pd > 0
-GROUP BY m.tournament_id, m.pi_num;
+	SELECT tournament_id, team_num, COUNT(pd) AS wins
+		FROM DetailedBallotView
+	WHERE pd > 0
+	GROUP BY tournament_id, team_num;
 
 DROP VIEW IF EXISTS TeamTotalTies;
 CREATE VIEW TeamTotalTies AS
-SELECT tournament_id, pi_num, COUNT(pd) AS ties
-FROM Matchup m
-	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
-						AND b.matchup_pi_num = m.pi_num
-						AND b.matchup_round_num = m.round_num
-WHERE pd = 0
-GROUP BY m.tournament_id, m.pi_num;
+	SELECT tournament_id, team_num, COUNT(pd) AS ties
+		FROM DetailedBallotView
+	WHERE pd = 0
+	GROUP BY tournament_id, team_num;
 
 DROP VIEW IF EXISTS TeamTotalLosses;
 CREATE VIEW TeamTotalLosses AS
-SELECT tournament_id, pi_num, COUNT(pd) AS losses
-FROM Matchup m
-	INNER JOIN Ballot b ON b.matchup_tournament_id = m.tournament_id
-						AND b.matchup_pi_num = m.pi_num
-						AND b.matchup_round_num = m.round_num
-WHERE pd < 0
-GROUP BY m.tournament_id, m.pi_num;
+	SELECT tournament_id, team_num, COUNT(pd) AS losses
+		FROM DetailedBallotView
+	WHERE pd < 0
+	GROUP BY tournament_id, team_num;
+    
 
 DROP VIEW IF EXISTS TeamTournamentRecord;
 CREATE VIEW TeamTournamentRecord AS
-SELECT w.tournament_id, w.pi_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
-FROM TeamTotalWins w
-	LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.pi_num = t.pi_num
-    LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.pi_num = l.pi_num;
+	SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+	FROM TeamTotalWins w
+		LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
+		LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+	UNION
+    SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+	FROM TeamTotalWins w
+		RIGHT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
+		RIGHT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+	WHERE w.team_num = NULL;
+        
+SELECT * FROM TeamTournamentRecord
+WHERE wins = 0;
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
-SELECT tournament_id, pi_num, SUM(wins) + (0.5 * SUM(ties)) AS ballots
-FROM TeamTournamentRecord
-GROUP BY tournament_id, pi_num;
+	SELECT tournament_id, team_num, SUM(wins) + (0.5 * SUM(ties)) AS ballots
+		FROM TeamTournamentRecord
+	GROUP BY tournament_id, team_num;
 
 DROP VIEW IF EXISTS TeamTournamentCS;
 CREATE VIEW TeamTournamentCS AS
-SELECT m.tournament_id, m.pi_num, SUM(b.ballots) AS totalCS
-FROM Matchup m
-	INNER JOIN TeamTournamentBallots b ON m.tournament_id = b.tournament_id AND m.def_num = b.pi_num
-GROUP BY m.tournament_id, m.pi_num;
+SELECT m.tournament_id, m.team_num, SUM(b.ballots) AS totalCS
+FROM DetailedBallotView m
+	INNER JOIN TeamTournamentBallots b ON m.tournament_id = b.tournament_id AND m.opp_num = b.team_num
+GROUP BY m.tournament_id, m.team_num;
 
 DROP VIEW IF EXISTS TeamTournamentOCS;
 CREATE VIEW TeamTournamentOCS AS
-SELECT m.tournament_id, m.pi_num, SUM(c.totalCS) AS totalOCS
-FROM Matchup m
-	INNER JOIN TeamTournamentCS c ON m.tournament_id = c.tournament_id AND m.def_num = c.pi_num
-GROUP BY m.tournament_id, m.pi_num;
+SELECT m.tournament_id, m.team_num, SUM(c.totalCS) AS totalOCS
+FROM DetailedBallotView m
+	INNER JOIN TeamTournamentCS c ON m.tournament_id = c.tournament_id AND m.opp_num = c.team_num
+GROUP BY m.tournament_id, m.team_num;
 
 DROP VIEW IF EXISTS TournamentTeamInfo;
 CREATE VIEW TournamentTeamInfo AS
-SELECT o.tournament_id, c.pi_num AS team_num, r.wins, r.ties, r.losses, p.totalPD, c.totalCS, o.totalOCS, t.year
+SELECT o.tournament_id, c.team_num AS team_num, r.wins, r.ties, r.losses, p.totalPD, c.totalCS, o.totalOCS, t.year
 FROM TeamTournamentOCS o
-	INNER JOIN TeamTournamentCS c ON o.tournament_id = c.tournament_id AND o.pi_num = c.pi_num
-    INNER JOIN TeamTotalPD p ON p.tournament_id = o.tournament_id AND p.pi_num = o.pi_num
-    INNER JOIN TeamTournamentRecord r ON o.tournament_id = r.tournament_id AND o.pi_num = r.pi_num
+	INNER JOIN TeamTournamentCS c ON o.tournament_id = c.tournament_id AND o.team_num = c.team_num
+    INNER JOIN TeamTotalPD p ON p.tournament_id = o.tournament_id AND p.team_num = o.team_num
+    INNER JOIN TeamTournamentRecord r ON o.tournament_id = r.tournament_id AND o.team_num = r.team_num
     INNER JOIN Tournament t ON o.tournament_id = t.tournament_id;
+        
+DROP VIEW IF EXISTS BestRoundPD;
+CREATE VIEW BestRoundPD AS
+	SELECT D.team_num, D.opp_num, D.tournament_id, AVG(D.pd) AS 'avg_pd', T.name, T.start_date
+		FROM DetailedBallotView D
+			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num
+    ORDER BY SUM(D.pd) DESC
+    LIMIT 1;
+        
+SELECT * FROM BestRoundPD;
+    
+DROP VIEW IF EXISTS SingleBestPD;
+CREATE VIEW SingleBestPD AS
+	SELECT D.*
+		FROM DetailedBallotView D
+			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+	ORDER BY D.pd DESC
+    LIMIT 1;
+    
+SELECT * FROM SingleBestPD;
+
+
+DROP PROCEDURE IF EXISTS create_extreme_records;
+
+DELIMITER //
+
+CREATE PROCEDURE create_extreme_records()
+
+BEGIN
+
+	DROP TABLE IF EXISTS project2.ExtremeRecords;
+	CREATE TABLE project2.ExtremeRecords (
+		`type` VARCHAR(10) NOT NULL,
+		tournament_id INT UNSIGNED NOT NULL,
+		team_num SMALLINT UNSIGNED NOT NULL,
+		team_name VARCHAR(75) NOT NULL,
+		wins TINYINT UNSIGNED NOT NULL,
+		ties TINYINT UNSIGNED NOT NULL,
+		losses TINYINT UNSIGNED NOT NULL,
+		totalPD INT NOT NULL,
+		totalCS INT NOT NULL,
+        totalOCS INT NOT NULL,
+		`year` INT NOT NULL,
+		tournament_name VARCHAR(75) NOT NULL
+	);
+
+	INSERT INTO ExtremeRecords
+		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+			FROM TournamentTeamInfo I
+				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
+				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
+		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
+		ORDER BY (wins+ties/2)/(wins+ties+losses) DESC, totalCS/(wins+ties+losses) DESC, totalOCS/(wins+ties+losses) DESC, totalPD/(wins+ties+losses) DESC
+		LIMIT 1;
+
+
+	INSERT INTO ExtremeRecords
+		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+			FROM TournamentTeamInfo I
+				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
+				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
+		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
+		ORDER BY (wins+ties/2)/(wins+ties+losses) ASC, totalCS/(wins+ties+losses) ASC, totalOCS/(wins+ties+losses) ASC, totalPD/(wins+ties+losses) ASC
+		LIMIT 1;
+        
+        SELECT * FROM ExtremeRecords;
+
+END //
+
+DELIMITER ;
+
+CALL create_extreme_records();
