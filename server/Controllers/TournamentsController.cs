@@ -23,32 +23,9 @@ namespace MockTrial.Controllers
         [HttpGet]
         public async Task<IActionResult> getTournaments()
         {
-            var teams = _context.teamInfos.Select(t => new {t.team_num, t.year, t.tpr_points});
-            var results = _context.teamTournamentResults.Select(t => new {t.team_num, t.tournament_id});
-            var tourns = _context.tournaments
-                .Select(t => new {t.tournament_id, t.tournament_name, t.start_date, t.end_date, t.host, t.year});
-
-            var teamsWithResults = from r in results
-                        join i in teams
-                            on r.team_num equals i.team_num
-                        select new {
-                            id = r.tournament_id,
-                            year = i.year,
-                            tpr_points = i.tpr_points
-                        };
-
-            var query = tourns.Select(t => new {
-                id = t.tournament_id,
-                name = t.tournament_name,
-                start_date = t.start_date,
-                end_date = t.end_date,
-                host = t.host,
-                teamCount = teamsWithResults.Where(r => r.id == t.tournament_id && r.year == t.year).Count(),
-                averageTPR = teamsWithResults.Where(r => r.id == t.tournament_id && r.year == t.year).Average(r => r.tpr_points)
-            });
             
             try {
-                return Ok(await query.ToListAsync());
+                return Ok(await _context.allTournamentsInfo.ToListAsync());
             } catch (Exception e)
             {
                 return BadRequest(e.Message);
