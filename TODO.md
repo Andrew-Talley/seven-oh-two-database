@@ -23,3 +23,4 @@
 - [ ] Create procedures for `Stats`
   - [ ] TPR Groups procedure
   - [ ] Superlatives procedure (or maybe just a query? I think that might be enough for some)
+- [ ] Create view for `TournamentsView`
