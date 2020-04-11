@@ -2,9 +2,16 @@ import * as React from 'react';
 import { Table, Button } from 'reactstrap';
 import { useGetTournamentsViewQuery } from '../../graphql-types';
 import { Link } from 'react-router-dom';
+import useAxios from '@use-hooks/axios';
 
 const TournamentsView: React.FC = () => {
-  const { data, loading, error } = useGetTournamentsViewQuery({});
+  const { response, loading, error } = useAxios({
+    url: '/api/tournaments',
+    trigger: 'go'
+  });
+
+  const { data } = response || {};
+  console.log(data);
 
   return (
     <React.Fragment>
@@ -33,7 +40,7 @@ const TournamentsView: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {data.allTournaments.map(tournament => {
+            {/* {data.allTournaments.map(tournament => {
               const dateString = (
                 tournament.start && tournament.end ?
                   tournament.start + tournament.end :
@@ -49,7 +56,7 @@ const TournamentsView: React.FC = () => {
                   <th scope="row">{tournament.averageTPR}</th>
                 </tr>
               );
-            })}
+            })} */}
           </tbody>
         </Table>
       }

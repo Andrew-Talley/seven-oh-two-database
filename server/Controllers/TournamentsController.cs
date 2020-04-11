@@ -37,6 +37,7 @@ namespace MockTrial.Controllers
                             on t.tournament_id equals tm.tournament
                         select new {
                             id = t.tournament_id,
+                            name = t.tournament_name,
                             start = t.start_date,
                             end = t.end_date,
                             host = t.host,
