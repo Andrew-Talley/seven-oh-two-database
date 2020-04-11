@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useGetTouranmentResultDataQuery } from "../graphql-types"
+import { useGetTouranmentResultDataQuery } from "../../graphql-types"
 import { Table, Row, Col } from "reactstrap";
 import useAxios from '@use-hooks/axios';
 

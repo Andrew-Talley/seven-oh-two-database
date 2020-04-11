@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TournamentResultTable } from "../../components/TournamentResultTable";
+import { TournamentResultTable } from "../../components/TournamentResultTable/TournamentResultTable";
 import { useRouteMatch } from 'react-router-dom';
 import { useGetSingleTournamentViewQuery, TournamentTeamData } from '../../graphql-types';
 import useAxios from '@use-hooks/axios';
