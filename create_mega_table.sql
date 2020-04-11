@@ -538,6 +538,9 @@ WHERE M.tournament_year != "";
 DELETE FROM megatable
 	WHERE tournament_id IS NULL;
     
+DELETE FROM megatable
+	WHERE tournament_id = 235; -- This data seems very off
+    
 DROP TABLE IF EXISTS TEMP_faulty_tournament_id;
 CREATE TABLE TEMP_faulty_tournament_id (
 	tournament_id INT
@@ -948,10 +951,10 @@ CREATE VIEW BallotMatchupJoinView AS
                                 
 DROP VIEW IF EXISTS DetailedBallotView;
 CREATE VIEW DetailedBallotView AS
-	SELECT ballot_id, tournament_id, pi_num AS team_num, def_num AS 'opp_num', pd, 'π' AS side
+	SELECT ballot_id, tournament_id, round_num, pi_num AS team_num, def_num AS 'opp_num', pd, 'π' AS side
 		FROM BallotMatchupJoinView
 	UNION
-    SELECT ballot_id, tournament_id, def_num AS team_num, pi_num AS team_num, -pd AS 'pd', '∆' AS side
+    SELECT ballot_id, tournament_id, round_num, def_num AS team_num, pi_num AS team_num, -pd AS 'pd', '∆' AS side
 		FROM BallotMatchupJoinView;
 
 DROP VIEW IF EXISTS TeamTotalPD;
@@ -982,13 +985,23 @@ CREATE VIEW TeamTotalLosses AS
 		FROM DetailedBallotView
 	WHERE pd < 0
 	GROUP BY tournament_id, team_num;
+    
 
 DROP VIEW IF EXISTS TeamTournamentRecord;
 CREATE VIEW TeamTournamentRecord AS
 	SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
 	FROM TeamTotalWins w
 		LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
-		LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num;
+		LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+	UNION
+    SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+	FROM TeamTotalWins w
+		RIGHT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
+		RIGHT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+	WHERE w.team_num = NULL;
+        
+SELECT * FROM TeamTournamentRecord
+WHERE wins = 0;
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
@@ -1018,4 +1031,76 @@ FROM TeamTournamentOCS o
     INNER JOIN TeamTotalPD p ON p.tournament_id = o.tournament_id AND p.team_num = o.team_num
     INNER JOIN TeamTournamentRecord r ON o.tournament_id = r.tournament_id AND o.team_num = r.team_num
     INNER JOIN Tournament t ON o.tournament_id = t.tournament_id;
+        
+DROP VIEW IF EXISTS BestRoundPD;
+CREATE VIEW BestRoundPD AS
+	SELECT D.team_num, D.opp_num, D.tournament_id, AVG(D.pd) AS 'avg_pd', T.name, T.start_date
+		FROM DetailedBallotView D
+			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num
+    ORDER BY SUM(D.pd) DESC
+    LIMIT 1;
+        
+SELECT * FROM BestRoundPD;
     
+DROP VIEW IF EXISTS SingleBestPD;
+CREATE VIEW SingleBestPD AS
+	SELECT D.*
+		FROM DetailedBallotView D
+			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+	ORDER BY D.pd DESC
+    LIMIT 1;
+    
+SELECT * FROM SingleBestPD;
+
+
+DROP PROCEDURE IF EXISTS create_extreme_records;
+
+DELIMITER //
+
+CREATE PROCEDURE create_extreme_records()
+
+BEGIN
+
+	DROP TABLE IF EXISTS project2.ExtremeRecords;
+	CREATE TABLE project2.ExtremeRecords (
+		`type` VARCHAR(10) NOT NULL,
+		tournament_id INT UNSIGNED NOT NULL,
+		team_num SMALLINT UNSIGNED NOT NULL,
+		team_name VARCHAR(75) NOT NULL,
+		wins TINYINT UNSIGNED NOT NULL,
+		ties TINYINT UNSIGNED NOT NULL,
+		losses TINYINT UNSIGNED NOT NULL,
+		totalPD INT NOT NULL,
+		totalCS INT NOT NULL,
+        totalOCS INT NOT NULL,
+		`year` INT NOT NULL,
+		tournament_name VARCHAR(75) NOT NULL
+	);
+
+	INSERT INTO ExtremeRecords
+		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+			FROM TournamentTeamInfo I
+				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
+				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
+		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
+		ORDER BY (wins+ties/2)/(wins+ties+losses) DESC, totalCS/(wins+ties+losses) DESC, totalOCS/(wins+ties+losses) DESC, totalPD/(wins+ties+losses) DESC
+		LIMIT 1;
+
+
+	INSERT INTO ExtremeRecords
+		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+			FROM TournamentTeamInfo I
+				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
+				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
+		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
+		ORDER BY (wins+ties/2)/(wins+ties+losses) ASC, totalCS/(wins+ties+losses) ASC, totalOCS/(wins+ties+losses) ASC, totalPD/(wins+ties+losses) ASC
+		LIMIT 1;
+        
+        SELECT * FROM ExtremeRecords;
+
+END //
+
+DELIMITER ;
+
+CALL create_extreme_records();
