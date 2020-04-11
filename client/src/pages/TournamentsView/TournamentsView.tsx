@@ -1,8 +1,18 @@
 import * as React from 'react';
-import { Table, Button } from 'reactstrap';
 import { useGetTournamentsViewQuery } from '../../graphql-types';
 import { Link } from 'react-router-dom';
+import Table, { Column } from 'react-bootstrap-table-next';
 import useAxios from '@use-hooks/axios';
+
+const COLUMNS: Column[] = [
+  { dataField: 'name', text: 'Name' },
+  { dataField: 'start_date', text: 'Date', formatter: (start_date, { end_date }) => (
+    <span>{new Date(start_date)} - {new Date(end_date)}</span>
+  )},
+  { dataField: 'host', text: 'Host' },
+  { dataField: 'teamCount', text: 'Size' },
+  { dataField: 'averageTPR', text: 'Average TPR' }
+]
 
 const TournamentsView: React.FC = () => {
   const { response, loading, error } = useAxios({
@@ -29,36 +39,8 @@ const TournamentsView: React.FC = () => {
       {
         loading ? "Loading..." :
         error ? error.message :
-        <Table>
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Date</th>
-              <th scope="col">Host</th>
-              <th scope="col">Size</th>
-              <th scope="col">Average TPR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* {data.allTournaments.map(tournament => {
-              const dateString = (
-                tournament.start && tournament.end ?
-                  tournament.start + tournament.end :
-                  'Unknown'
-              );
-
-              return (
-                <tr key={tournament.id}>
-                  <th scope="row">{tournament.name}</th>
-                  <th scope="row">{dateString}</th>
-                  <th scope="row">{tournament.host || 'Unknown'}</th>
-                  <th scope="row">{tournament.teams.length}</th>
-                  <th scope="row">{tournament.averageTPR}</th>
-                </tr>
-              );
-            })} */}
-          </tbody>
-        </Table>
+        !data ? 'Failed to low data...' :
+        <Table columns={COLUMNS} data={data} keyField='id' />
       }
     </React.Fragment>
   )

@@ -33,7 +33,7 @@ const App = () => {
 									</Link>
 								</NavItem>
 								<NavItem>
-									<Link to="/team">
+									<Link to="/teams">
 										<NavLink tag="span">
 											Teams
 										</NavLink>
