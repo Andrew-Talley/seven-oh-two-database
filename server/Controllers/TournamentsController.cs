@@ -23,26 +23,30 @@ namespace MockTrial.Controllers
         [HttpGet]
         public async Task<IActionResult> getTournaments()
         {
-            var teams = await (from ti in _context.teamInfos
-                        join ttr in _context.teamTournamentResults
-                            on ti.team_num equals ttr.team_num
-                        select new {
-                            year = ti.year,
-                            tpr = ti.tpr_points,
-                            tournament = ttr.tournament_id
-                        }).ToListAsync();
+            var teams = _context.teamInfos.Select(t => new {t.team_num, t.year, t.tpr_points});
+            var results = _context.teamTournamentResults.Select(t => new {t.team_num, t.tournament_id});
+            var tourns = _context.tournaments
+                .Select(t => new {t.tournament_id, t.tournament_name, t.start_date, t.end_date, t.host, t.year});
 
-            var query = from t in _context.tournaments
-                        join tm in teams
-                            on t.tournament_id equals tm.tournament
+            var teamsWithResults = from r in results
+                        join i in teams
+                            on r.team_num equals i.team_num
                         select new {
-                            id = t.tournament_id,
-                            start = t.start_date,
-                            end = t.end_date,
-                            host = t.host,
-                            count = teams.Count,
-                            averageTPR = teams.Average(entry => entry.tpr)
+                            id = r.tournament_id,
+                            year = i.year,
+                            tpr_points = i.tpr_points
                         };
+
+            var query = tourns.Select(t => new {
+                id = t.tournament_id,
+                name = t.tournament_name,
+                start_date = t.start_date,
+                end_date = t.end_date,
+                host = t.host,
+                teamCount = teamsWithResults.Where(r => r.id == t.tournament_id && r.year == t.year).Count(),
+                averageTPR = teamsWithResults.Where(r => r.id == t.tournament_id && r.year == t.year).Average(r => r.tpr_points)
+            });
+            
             try {
                 return Ok(await query.ToListAsync());
             } catch (Exception e)

@@ -14,9 +14,9 @@ namespace MockTrial.DTOs
 
         public string division { get; set; }
 
-        public DateTime start_date { get; set; }
+        public DateTime? start_date { get; set; }
 
-        public DateTime end_date { get; set; }
+        public DateTime? end_date { get; set; }
 
         public string host { get; set; }
 
@@ -26,9 +26,9 @@ namespace MockTrial.DTOs
 
         public string second_coin_flip { get; set; }
 
-        public DateTime bid_start_date { get; set; }
+        public DateTime? bid_start_date { get; set; }
 
-        public DateTime bid_end_date { get; set; }
+        public DateTime? bid_end_date { get; set; }
 
         public string bid_location { get; set; }
 
@@ -36,7 +36,7 @@ namespace MockTrial.DTOs
         
         public string bids_plus_one_after_r3 { get; set; }
 
-        public int number_of_bids { get; set; }
+        public int? number_of_bids { get; set; }
 
         public int year { get; set; }
 

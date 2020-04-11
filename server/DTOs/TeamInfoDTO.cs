@@ -13,9 +13,9 @@ namespace MockTrial.DTOs
 
         public string team_name { get; set; }
 
-        public int tpr_rank { get; set; }
+        public int? tpr_rank { get; set; }
 
-        public double tpr_points { get; set; }
+        public double? tpr_points { get; set; }
 
         public string school { get; set; }
 
