@@ -17,6 +17,7 @@ namespace MockTrial.Data
         public DbSet<CaseNamesDTO> caseNames { get; set; }
         public DbSet<ExhibitDetailsDTO> exhibitDetails { get; set; }
         public DbSet<MatchupDTO> matchups { get; set; }
+        public DbSet<MultipleTournamentsDTO> allTournamentsInfo { get; set; }
         public DbSet<StudentDTO> students { get; set; }
         public DbSet<TeamInfoDTO> teamInfos { get; set; }
         public DbSet<TeamTournamentResultsDTO> teamTournamentResults { get; set; }
@@ -106,6 +107,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<CaseNamesDTO>().ToTable("casenames");
             modelBuilder.Entity<ExhibitDetailsDTO>().ToTable("exhibitdetails");
             modelBuilder.Entity<MatchupDTO>().ToTable("matchup");
+            modelBuilder.Entity<MultipleTournamentsDTO>().ToTable("alltournamentsinfo");
             modelBuilder.Entity<StudentDTO>().ToTable("student");
             modelBuilder.Entity<TeamInfoDTO>().ToTable("teaminfo");
             modelBuilder.Entity<TeamTournamentResultsDTO>().ToTable("teamtournamentresults");

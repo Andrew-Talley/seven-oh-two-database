@@ -198,6 +198,7 @@ CREATE TABLE megatable(
     PRIMARY KEY(ballot_id)
 );
 
+-- LOAD DATA INFILE 'C:\\wamp64\\tmp\\full-data.csv'
 LOAD DATA INFILE '~/Google Drive/College Work/Junior/Spring/Databases/full-data.csv'
 	IGNORE
 	INTO TABLE megatable
@@ -1134,8 +1135,6 @@ DELIMITER ;
 
 CALL create_extreme_records();
 
-SELECT * FROM TeamTournamentResults LIMIT 1;
-
 CREATE OR REPLACE VIEW group_matchups AS
 	SELECT 
 			SUM(CASE WHEN D.pd > 0 THEN 1 ELSE 0 END)/SUM(CASE WHEN D.pd = 0 THEN 0 ELSE 1 END) AS 'percent-wins', 
@@ -1151,3 +1150,10 @@ CREATE OR REPLACE VIEW group_matchups AS
 SELECT * FROM group_matchups;
 
 
+DROP VIEW IF EXISTS allTournamentsInfo;
+CREATE VIEW allTournamentsInfo AS
+SELECT t.tournament_id, t.start_date, t.end_date, t.host, COUNT(ti.team_num) AS teamCount, AVG(ti.tpr_points) AS avgPoints
+FROM tournament t
+	LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
+    LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
+GROUP BY t.tournament_id;
