@@ -321,6 +321,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`TeamTournamentResults` (
   `team_num` SMALLINT NOT NULL,
   `won_SPAMTA` TINYINT NULL,
   `SPAMTA_honorable_mention` TINYINT NULL,
+  `tpr_group_designator` CHAR(1) NULL,
   `SPAMTA_ranks` TINYINT NULL,
   PRIMARY KEY (`tournament_id`, `team_num`),
   INDEX `fk_TeamName_team_num_idx` (`team_num` ASC),
@@ -625,18 +626,48 @@ WHERE R.number_of_bids > 0;
 INSERT INTO TeamInfo
 	SELECT DISTINCT team_num, tournament_year, team_name, tpr_rank, tpr_points, school
 		FROM megatable WHERE school <> '';
+        
+SELECT * FROM TeamTournamentResults;
 
 INSERT INTO TeamTournamentResults
-	SELECT DISTINCT tournament_id, team_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
+	SELECT DISTINCT tournament_id, team_num, IF(won_spamta = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), 'A', SPAMTA_ranks
 		FROM megatable;
-
+        
 INSERT INTO TeamTournamentResults
-	SELECT DISTINCT tournament_id, opp_num, IF(spamta_honorable_mention = 'TRUE', 1, 0), IF(spamta_honorable_mention = 'TRUE', 1, 0), SPAMTA_ranks
+	SELECT DISTINCT tournament_id, opp_num, IF(won_spamta = 'TRUE', 1, 0) AS 'spamta_honorable', IF(spamta_honorable_mention = 'TRUE', 1, 0), 'A', SPAMTA_ranks
 		FROM megatable
 	WHERE (tournament_id, opp_num) NOT IN (
 		SELECT tournament_id, team_num
 			FROM TeamTournamentResults
 	);
+    
+DROP TABLE IF EXISTS TEMP_Group_Deisgnator;
+CREATE TABLE TEMP_Group_Deisgnator (
+	`tournament_id` INT UNSIGNED NOT NULL,
+	`team_num` SMALLINT NOT NULL,
+	`tpr_group_designator` CHAR(1) NULL
+);
+
+INSERT INTO TEMP_Group_Deisgnator
+	SELECT tournament_id, team_num, MIN(tpr_group_designator)
+		FROM megatable
+	GROUP BY tournament_id, team_num;
+INSERT INTO TEMP_Group_Deisgnator
+	SELECT tournament_id, opp_num, MIN(tpr_group_designator)
+		FROM megatable
+	WHERE (tournament_id, opp_num) NOT IN (
+		SELECT tournament_id, team_num
+			FROM TeamTournamentResults
+	)
+    GROUP BY tournament_id, opp_num;
+    
+    
+    
+SET SQL_SAFE_UPDATES=0;
+UPDATE TeamTournamentResults T
+	INNER JOIN TEMP_Group_Deisgnator G ON T.tournament_id = G.tournament_id AND T.team_num = G.team_num
+	SET T.tpr_group_designator = G.tpr_group_designator;
+SET SQL_SAFE_UPDATES=1;
 
 DROP PROCEDURE IF EXISTS insert_students;
 
@@ -697,8 +728,6 @@ INSERT INTO AMTARep
 	SELECT DISTINCT tournament_id, 2, amta_rep_2
 		FROM megatable
 	WHERE amta_rep_2 NOT LIKE '%coin flip%';
-
-SELECT * FROM TeamTournamentResults;
 
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
@@ -1094,7 +1123,7 @@ BEGIN
 				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
 				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
 		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
-		ORDER BY (wins+ties/2)/(wins+ties+losses) ASC, totalCS/(wins+ties+losses) ASC, totalOCS/(wins+ties+losses) ASC, totalPD/(wins+ties+losses) ASC
+		ORDER BY (I.wins+I.ties/2)/(I.wins+I.ties+I.losses) ASC, I.totalCS/(I.wins+I.ties+I.losses) ASC, I.totalOCS/(I.wins+I.ties+I.losses) ASC, I.totalPD/(I.wins+I.ties+I.losses) ASC
 		LIMIT 1;
         
         SELECT * FROM ExtremeRecords;
@@ -1104,3 +1133,21 @@ END //
 DELIMITER ;
 
 CALL create_extreme_records();
+
+SELECT * FROM TeamTournamentResults LIMIT 1;
+
+CREATE OR REPLACE VIEW group_matchups AS
+	SELECT 
+			SUM(CASE WHEN D.pd > 0 THEN 1 ELSE 0 END)/SUM(CASE WHEN D.pd = 0 THEN 0 ELSE 1 END) AS 'percent-wins', 
+            RTeam.tpr_group_designator AS 'designator', 
+            ROpp.tpr_group_designator AS 'opp_designator'
+		FROM DetailedBallotView D
+			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+			INNER JOIN TeamTournamentResults RTeam ON D.tournament_id = RTeam.tournament_id AND D.team_num = RTeam.team_num
+            INNER JOIN TeamTournamentResults ROpp ON D.tournament_id = ROpp.tournament_id AND D.opp_num = ROpp.team_num
+	WHERE T.level = 'orcs' AND D.round_num = 1
+    GROUP BY RTeam.tpr_group_designator, ROpp.tpr_group_designator;
+
+SELECT * FROM group_matchups;
+
+

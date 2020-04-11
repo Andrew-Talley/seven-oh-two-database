@@ -26,7 +26,7 @@ namespace MockTrial.Controllers
             var teams = _context.teamInfos.Select(t => new {t.team_num, t.year, t.tpr_points});
             var results = _context.teamTournamentResults.Select(t => new {t.team_num, t.tournament_id});
             var tourns = _context.tournaments
-                .Select(t => new {t.tournament_id, t.tournament_name, t.start_date, t.end_date, t.host, t.year});
+                .Select(t => new {t.tournament_id, t.division, t.level, t.tournament_name, t.start_date, t.end_date, t.host, t.year});
 
             var teamsWithResults = from r in results
                         join i in teams
@@ -40,6 +40,8 @@ namespace MockTrial.Controllers
             var query = tourns.Select(t => new {
                 id = t.tournament_id,
                 name = t.tournament_name,
+                level = t.level,
+                division = t.division,
                 start_date = t.start_date,
                 end_date = t.end_date,
                 host = t.host,
