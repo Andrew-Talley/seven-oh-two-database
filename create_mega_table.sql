@@ -1087,7 +1087,7 @@ DELIMITER ;
 
 CALL create_extreme_records();
 
-CREATE OR REPLACE VIEW group_matchups AS
+CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 
 			SUM(CASE WHEN D.pd > 0 THEN 1 ELSE 0 END)/SUM(CASE WHEN D.pd = 0 THEN 0 ELSE 1 END) AS 'percent-wins', 
             RTeam.tpr_group_designator AS 'designator', 
@@ -1099,8 +1099,9 @@ CREATE OR REPLACE VIEW group_matchups AS
 	WHERE T.level = 'orcs' AND D.round_num = 1
     GROUP BY RTeam.tpr_group_designator, ROpp.tpr_group_designator;
 
-SELECT * FROM group_matchups;
+SELECT * FROM GroupMatchups;
 
+SELECT * FROM CaseDetails;
 
 DROP VIEW IF EXISTS allTournamentsInfo;
 CREATE VIEW allTournamentsInfo AS
