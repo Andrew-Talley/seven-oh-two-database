@@ -199,6 +199,8 @@ declare module 'react-bootstrap-table-next' {
         keyField: string;
         columns: Column[];
         data: TODO[];
+        bodyClasses?: string;
+        classes?: string[];
         headerClasses?: string;
         hover?: boolean;
         remote?: boolean | RemoteProps;

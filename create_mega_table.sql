@@ -1087,7 +1087,7 @@ DELIMITER ;
 
 CALL create_extreme_records();
 
-CREATE OR REPLACE VIEW group_matchups AS
+CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 
 			SUM(CASE WHEN D.pd > 0 THEN 1 ELSE 0 END)/SUM(CASE WHEN D.pd = 0 THEN 0 ELSE 1 END) AS 'percent-wins', 
             RTeam.tpr_group_designator AS 'designator', 
@@ -1102,8 +1102,8 @@ CREATE OR REPLACE VIEW group_matchups AS
 
 DROP VIEW IF EXISTS allTournamentsInfo;
 CREATE VIEW allTournamentsInfo AS
-SELECT t.tournament_id, t.start_date, t.end_date, t.host, COUNT(ti.team_num) AS teamCount, AVG(ti.tpr_points) AS avgPoints
-FROM tournament t
-	LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
-    LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
-GROUP BY t.tournament_id;
+	SELECT t.name, t.tournament_id, t.level, t.start_date, t.end_date, t.host, COUNT(ti.team_num) AS teamCount, AVG(ti.tpr_points) AS avgPoints
+	FROM tournament t
+		LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
+		LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
+	GROUP BY t.tournament_id;

@@ -30,7 +30,7 @@ namespace MockTrial.Controllers
                     .Include(cn => cn.caseDetails)
                     .Select(c => new {
                         year = c.year,
-                        isNationals = c.caseDetails.nationals_case > 0, // MySQL stores bools as TINYINTs
+                        isNationals = c.caseDetails.nationals_case, // MySQL stores bools as TINYINTs
                         caseName = c.case_name,
                         caseType = c.caseDetails.type_charge
                     })
