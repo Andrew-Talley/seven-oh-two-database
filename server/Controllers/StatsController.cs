@@ -49,6 +49,20 @@ namespace MockTrial.Controllers
         }
 
         [HttpGet]
+        [Route("extremerecords")]
+        public async Task<IActionResult> getExtremeRecords()
+        {
+            try
+            {
+                return Ok(await _context.extremeRecords.ToListAsync());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet]
         [Route("groupmatchup")]
         public async Task<IActionResult> getGroupMatchups()
         {

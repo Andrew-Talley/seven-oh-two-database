@@ -1,14 +1,26 @@
 import * as React from 'react';
 import { Table } from 'reactstrap';
+import useAxios from '@use-hooks/axios';
 
+const GROUPS = ['A', 'B', 'C', 'D']
 export const TPRGroups: React.FC = () => {
-  const groups = ['A', 'B', 'C', 'D']
-  const data: string[][] = [
-    ['50%', '60%', '70%', '80%'],
-    ['40%', '50%', '60%', '70%'],
-    ['30%', '40%', '50%', '60%'],
-    ['20%', '30%', '40%', '50%']
-  ];
+  const { response, loading, error } = useAxios({
+    url: '/api/stats/groupmatchup',
+    trigger: 'go'
+  });
+
+  const respData = response?.data;
+
+  const data = Array.from(
+    new Array(4), () => Array.from(new Array(4))
+  )
+  respData?.forEach((m: any) => {
+    const team_ind = GROUPS.indexOf(m.designator);
+    const opp_ind = GROUPS.indexOf(m.opp_designator);
+    data[team_ind][opp_ind] = m.percent_wins;
+  })
+  
+  console.log(data);
 
   const bidFrequency: [string[], string[]] = [
     ['60%', '30%', '10%', '5%'],
@@ -20,7 +32,7 @@ export const TPRGroups: React.FC = () => {
       <thead className="thead-dark">
         <tr>
           <th>Group</th>
-          {groups.map(group => (
+          {GROUPS.map(group => (
               <th>Group {group}</th>
             ))}
         </tr>
@@ -38,9 +50,9 @@ export const TPRGroups: React.FC = () => {
         <tbody>
           {data.map((row, i) => (
             <tr key={i}>
-              <th scope="row">Group {groups[i]}</th>
+              <th scope="row">Group {GROUPS[i]}</th>
               {row.map((percent, j) => (
-                <td key={j}>{percent}</td>
+                <td key={j}>{parseFloat(percent).toFixed(3)}</td>
               ))}
             </tr>
           ))}

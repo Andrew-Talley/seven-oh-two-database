@@ -1,73 +1,52 @@
 import * as React from 'react';
 import { ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, Row, Col, Card, CardHeader, CardBody, CardTitle } from 'reactstrap';
+import useAxios from '@use-hooks/axios';
+import { BestRoundPD } from '../../../components/BestRoundPD/BestRoundPD';
+import { BestBallotPD } from '../../../components/BestBallotPD/BestBallotPD';
+import { ExtremeRecord } from '../../../components/ExtremeRecord/ExtremeRecord';
+import { StatPanel } from '../../../components/StatPanel/StatPanel';
 
 export const Superlatives: React.FC = () => {
+  const { response, loading, error } = useAxios({
+    url: '/api/stats/extremerecords',
+    trigger: 'go'
+  });
+
+  const data = response?.data as any[];
+  const best = data?.find(r => r.type === 'best');
+  const worst = data?.find(r => r.type === 'worst');
+  console.log(data);
+  console.log([best, worst]);
+
   return (
-    <Row>
-      <Col md={6}>
-        <h2 className="px-2">PD Stats</h2>
-        <ListGroup className="py-2">
-          <ListGroupItem>
-            <ListGroupItemHeading>
-              Highest Single-Round PD
-            </ListGroupItemHeading>
-            <ListGroupItemText>
-              <h3>Rhodes College</h3>
-              <div className="text-muted d-flex flex-column">
-                <span>Grand Ole Tournament, Nov 8, 2018</span>
-                <span>R3, π vs. 1034 (Bellarmine University B)</span>
-                <span>+56 (+15, +43)</span>
-              </div>
-            </ListGroupItemText>
-          </ListGroupItem>
-        </ListGroup>
-        <ListGroup className="py-2">
-          <ListGroupItem>
-            <ListGroupItemHeading>
-              Highest Single-Ballot PD
-            </ListGroupItemHeading>
-            <ListGroupItemText>
-            <h3>Rhodes College</h3>
-              <div className="text-muted d-flex flex-column">
-                <span>Grand Ole Tournament, Nov 8, 2018</span>
-                <span>R3, π vs. 1034 (Bellarmine University B)</span>
-                <span>+76 (other ballots: +15, +43)</span>
-              </div>
-            </ListGroupItemText>
-          </ListGroupItem>
-        </ListGroup>
-      </Col>
-      <Col md={6}>
-        <h2 className="px-2">Record Stats</h2>
-        <ListGroup className="py-2">
-          <ListGroupItem>
-            <ListGroupItemHeading>
-              Best Record at an AMTA Tournament
-            </ListGroupItemHeading>
-            <ListGroupItemText>
-              <h3>Rhodes College</h3>
-              <div className="text-muted d-flex flex-column">
-                <span>Jackson Regional, 2018</span>
-                <span>8-0-0 CS: 24, OCS: 184, PD: +100</span>
-              </div>
-            </ListGroupItemText>
-          </ListGroupItem>
-        </ListGroup>
-        <ListGroup className="py-2">
-          <ListGroupItem>
-            <ListGroupItemHeading>
-              Worst Record at an AMTA Tournament
-            </ListGroupItemHeading>
-            <ListGroupItemText>
-              <h3>Bellarmine College</h3>
-              <div className="text-muted d-flex flex-column">
-                <span>Louisville Regional, 2017</span>
-                <span>0-8-0 CS: 8, OCS: 35, PD: -124</span>
-              </div>
-            </ListGroupItemText>
-          </ListGroupItem>
-        </ListGroup>
-      </Col>
-    </Row>
+    <React.Fragment>
+      <h1 className="display-4">Superlatives</h1>
+      <Row>
+        <Col md={6}>
+          <h2 className="px-2">PD Stats</h2>
+          <BestRoundPD />
+          <BestBallotPD />
+        </Col>
+        <Col md={6}>
+          <h2 className="px-2">Record Stats</h2>
+          <StatPanel
+            heading="Best Record at an AMTA Tournament"
+            body={
+              error ? <span className="text-danger">{error.message}</span> :
+              loading || !best ? 'Loading...' :
+              <ExtremeRecord {...best} />
+            }
+          />
+          <StatPanel
+            heading="Worst Record at an AMTA Tournament"
+            body={
+              error ? <span className="text-danger">{error.message}</span> :
+              loading || !worst ? 'Loading...' :
+              <ExtremeRecord {...worst} />
+            }
+          />
+        </Col>
+      </Row>
+    </React.Fragment>
   )
 }

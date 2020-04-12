@@ -666,7 +666,6 @@ BEGIN
     SET SQL_SAFE_UPDATES=0;
 
 	WHILE student_num <= 5 DO
-    BEGIN
     
 		SELECT CONCAT("UPDATE megatable SET student_", student_num, " = NULL WHERE student_", student_num, " = ''") INTO @sql_str;
 		PREPARE statement FROM @sql_str;           
@@ -689,7 +688,6 @@ BEGIN
 		EXECUTE statement;
 
 		SET student_num = student_num + 1;
-	END;
 	END WHILE;
     
     SET SQL_SAFE_UPDATES=1;
@@ -698,6 +696,8 @@ END //
 DELIMITER ;
 
 CALL insert_students();
+
+SELECT * FROM Student;
         
 INSERT INTO AMTARep
 	SELECT DISTINCT tournament_id, 0, amta_rep_0
@@ -950,6 +950,14 @@ CREATE VIEW DetailedBallotView AS
 	UNION
     SELECT ballot_id, tournament_id, round_num, def_num AS team_num, pi_num AS team_num, -pd AS 'pd', '∆' AS side
 		FROM BallotMatchupJoinView;
+        
+DROP VIEW IF EXISTS DetailedMatchupView;
+CREATE VIEW DetailedMatchupView AS
+	SELECT tournament_id, round_num, pi_num AS team_num, def_num AS 'opp_num', 'π' AS side
+		FROM Matchup
+	UNION
+    SELECT tournament_id, round_num, def_num AS team_num, pi_num AS 'opp_num', 'π' AS side
+		FROM Matchup;
 
 DROP VIEW IF EXISTS TeamTotalPD;
 CREATE VIEW TeamTotalPD AS
@@ -981,16 +989,16 @@ CREATE VIEW TeamTotalLosses AS
 
 DROP VIEW IF EXISTS TeamTournamentRecord;
 CREATE VIEW TeamTournamentRecord AS
-	SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
-	FROM TeamTotalWins w
-		LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
-		LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+		(SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+		FROM TeamTotalWins w
+			LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
+			LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num)
 	UNION
-    SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
-	FROM TeamTotalWins w
-		RIGHT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
-		RIGHT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
-	WHERE w.team_num = NULL;
+		(SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+		FROM TeamTotalLosses l
+			LEFT JOIN TeamTotalTies t ON l.tournament_id = t.tournament_id AND l.team_num = t.team_num
+			LEFT JOIN TeamTotalWins w ON l.tournament_id = w.tournament_id AND l.team_num = w.team_num
+		WHERE w.team_num IS NULL);
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
@@ -1001,14 +1009,14 @@ CREATE VIEW TeamTournamentBallots AS
 DROP VIEW IF EXISTS TeamTournamentCS;
 CREATE VIEW TeamTournamentCS AS
 SELECT m.tournament_id, m.team_num, SUM(b.ballots) AS totalCS
-FROM DetailedBallotView m
+FROM DetailedMatchupView m
 	INNER JOIN TeamTournamentBallots b ON m.tournament_id = b.tournament_id AND m.opp_num = b.team_num
 GROUP BY m.tournament_id, m.team_num;
 
 DROP VIEW IF EXISTS TeamTournamentOCS;
 CREATE VIEW TeamTournamentOCS AS
 SELECT m.tournament_id, m.team_num, SUM(c.totalCS) AS totalOCS
-FROM DetailedBallotView m
+FROM DetailedMatchupView m
 	INNER JOIN TeamTournamentCS c ON m.tournament_id = c.tournament_id AND m.opp_num = c.team_num
 GROUP BY m.tournament_id, m.team_num;
 
@@ -1023,20 +1031,30 @@ FROM TeamTournamentOCS o
         
 DROP VIEW IF EXISTS BestRoundPD;
 CREATE VIEW BestRoundPD AS
-	SELECT D.team_num, D.opp_num, D.tournament_id, AVG(D.pd) AS 'avg_pd', T.name, T.start_date
+	SELECT D.team_num, D.opp_num, D.tournament_id, D.round_num, AVG(D.pd) AS 'avg_pd', T.name AS 'tournament_name', T.start_date, E.team_name, O.team_name AS "opp_name"
 		FROM DetailedBallotView D
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
-	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num
-    ORDER BY SUM(D.pd) DESC
+            INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
+            INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = O.year
+	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num, T.year
+    HAVING AVG(D.pd) < 140
+    ORDER BY AVG(D.pd) DESC
     LIMIT 1;
     
+SELECT * FROM BestRoundPD;
+        
 DROP VIEW IF EXISTS SingleBestPD;
 CREATE VIEW SingleBestPD AS
-	SELECT D.*
+	SELECT D.*, T.name AS 'tournament_name', E.team_name, O.team_name AS "opp_name"
 		FROM DetailedBallotView D
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
-	ORDER BY D.pd DESC
+            INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
+            INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = E.year
+	WHERE D.pd < 140
+    ORDER BY D.pd DESC
     LIMIT 1;
+    
+SELECT * FROM SingleBestPD;
 
 DROP PROCEDURE IF EXISTS create_extreme_records;
 
@@ -1046,6 +1064,10 @@ CREATE PROCEDURE create_extreme_records()
 
 BEGIN
 
+	-- Since this is a temporary table that will need regular updates and should have
+    -- no dependencies, data integrity isn't really a concern. Instead, improving
+    -- performance is more relevant, and so it isn't in BCNF. The only reason it
+    -- isn't done as a view is for performance concerns.
 	DROP TABLE IF EXISTS project2.ExtremeRecords;
 	CREATE TABLE project2.ExtremeRecords (
 		`type` VARCHAR(10) NOT NULL,
@@ -1059,11 +1081,14 @@ BEGIN
 		totalCS INT NOT NULL,
         totalOCS INT NOT NULL,
 		`year` INT NOT NULL,
-		tournament_name VARCHAR(75) NOT NULL
+		tournament_name VARCHAR(75) NOT NULL,
+        `level` VARCHAR(10),
+        
+        PRIMARY KEY (`type`)
 	);
 
 	INSERT INTO ExtremeRecords
-		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name', T.level
 			FROM TournamentTeamInfo I
 				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
 				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
@@ -1073,7 +1098,7 @@ BEGIN
 
 
 	INSERT INTO ExtremeRecords
-		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name', T.level
 			FROM TournamentTeamInfo I
 				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
 				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
@@ -1086,6 +1111,8 @@ END //
 DELIMITER ;
 
 CALL create_extreme_records();
+
+SELECT * FROM ExtremeRecords;
 
 CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 

@@ -27,6 +27,7 @@ namespace MockTrial.Data
         public DbSet<TournamentDTO> tournaments { get; set; }
         public DbSet<TournamentTeamInfoDTO> TournamentTeamData { get; set; }
         public DbSet<WitnessDetailsDTO> witnessDetails { get; set; }
+        public DbSet<ExtremeRecordDTO> extremeRecords { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,8 +45,12 @@ namespace MockTrial.Data
             modelBuilder.Entity<TeamInfoDTO>().HasKey(t => new {t.team_num, t.year});
             modelBuilder.Entity<TeamTournamentResultsDTO>().HasKey(t => new {t.tournament_id, t.team_num});
             modelBuilder.Entity<TournamentDTO>().HasKey(t => t.tournament_id);
+            modelBuilder.Entity<GroupMatchupsDTO>().HasKey(t => new { t.designator, t.opp_designator });
             modelBuilder.Entity<TournamentTeamInfoDTO>().HasKey(t => new {t.tournament_id, t.team_num, t.year});
             modelBuilder.Entity<WitnessDetailsDTO>().HasKey(w => w.name);
+            modelBuilder.Entity<SingleBestPdDTO>().HasKey(w => w.team_num);
+            modelBuilder.Entity<BestRoundPdDTO>().HasKey(w => w.team_num);
+            modelBuilder.Entity<ExtremeRecordDTO>();
             #endregion
 
             // Declare all of the foreign keys
@@ -111,6 +116,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<TournamentTeamInfoDTO>().ToTable("tournamentteaminfo");
             modelBuilder.Entity<TournamentDTO>().ToTable("tournament");
             modelBuilder.Entity<WitnessDetailsDTO>().ToTable("witnessdetails");
+            modelBuilder.Entity<ExtremeRecordDTO>().ToTable("extremerecords");
             #endregion
         }
     }
