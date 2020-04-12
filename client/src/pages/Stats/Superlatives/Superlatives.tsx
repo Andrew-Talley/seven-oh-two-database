@@ -1,32 +1,21 @@
 import * as React from 'react';
 import { ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, Row, Col, Card, CardHeader, CardBody, CardTitle } from 'reactstrap';
+import useAxios from '@use-hooks/axios';
+import { BestRoundPD } from '../../../components/BestRoundPD/BestRoundPD';
 
 export const Superlatives: React.FC = () => {
+
   return (
     <Row>
       <Col md={6}>
         <h2 className="px-2">PD Stats</h2>
-        <ListGroup className="py-2">
-          <ListGroupItem>
-            <ListGroupItemHeading>
-              Highest Single-Round PD
-            </ListGroupItemHeading>
-            <ListGroupItemText>
-              <h3>Rhodes College</h3>
-              <div className="text-muted d-flex flex-column">
-                <span>Grand Ole Tournament, Nov 8, 2018</span>
-                <span>R3, π vs. 1034 (Bellarmine University B)</span>
-                <span>+56 (+15, +43)</span>
-              </div>
-            </ListGroupItemText>
-          </ListGroupItem>
-        </ListGroup>
+        <BestRoundPD />
         <ListGroup className="py-2">
           <ListGroupItem>
             <ListGroupItemHeading>
               Highest Single-Ballot PD
             </ListGroupItemHeading>
-            <ListGroupItemText>
+            <ListGroupItemText tag="div">
             <h3>Rhodes College</h3>
               <div className="text-muted d-flex flex-column">
                 <span>Grand Ole Tournament, Nov 8, 2018</span>
@@ -44,7 +33,7 @@ export const Superlatives: React.FC = () => {
             <ListGroupItemHeading>
               Best Record at an AMTA Tournament
             </ListGroupItemHeading>
-            <ListGroupItemText>
+            <ListGroupItemText tag="div">
               <h3>Rhodes College</h3>
               <div className="text-muted d-flex flex-column">
                 <span>Jackson Regional, 2018</span>
@@ -58,7 +47,7 @@ export const Superlatives: React.FC = () => {
             <ListGroupItemHeading>
               Worst Record at an AMTA Tournament
             </ListGroupItemHeading>
-            <ListGroupItemText>
+            <ListGroupItemText tag="div">
               <h3>Bellarmine College</h3>
               <div className="text-muted d-flex flex-column">
                 <span>Louisville Regional, 2017</span>

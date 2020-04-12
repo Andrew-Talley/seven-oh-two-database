@@ -13,7 +13,7 @@ const COLUMNS: Column[] = [
     const formatter = new Intl.DateTimeFormat('en', {
       year: 'numeric',
       month: 'short',
-      day: '2-digit'
+      day: 'numeric'
     });
     const [start_string, end_string] = [start, end].map(d => formatter.format(d));
     return (<span>{start_string} - {end_string}</span>)

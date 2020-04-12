@@ -1023,20 +1023,28 @@ FROM TeamTournamentOCS o
         
 DROP VIEW IF EXISTS BestRoundPD;
 CREATE VIEW BestRoundPD AS
-	SELECT D.team_num, D.opp_num, D.tournament_id, AVG(D.pd) AS 'avg_pd', T.name, T.start_date
+	SELECT D.team_num, D.opp_num, D.tournament_id, D.round_num, AVG(D.pd) AS 'avg_pd', T.name AS 'tournament_name', T.start_date, E.team_name, O.team_name AS "opp_name"
 		FROM DetailedBallotView D
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
-	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num
+            INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
+            INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = O.year
+	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num, T.year
     ORDER BY SUM(D.pd) DESC
     LIMIT 1;
     
+SELECT * FROM BestRoundPD;
+        
 DROP VIEW IF EXISTS SingleBestPD;
 CREATE VIEW SingleBestPD AS
-	SELECT D.*
+	SELECT D.*, T.name AS 'tournament_name', E.team_name, O.team_name AS "opp_name"
 		FROM DetailedBallotView D
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
+            INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
+            INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = E.year
 	ORDER BY D.pd DESC
     LIMIT 1;
+    
+SELECT * FROM SingleBestPD;
 
 DROP PROCEDURE IF EXISTS create_extreme_records;
 
@@ -1046,6 +1054,10 @@ CREATE PROCEDURE create_extreme_records()
 
 BEGIN
 
+	-- Since this is a temporary table that will need regular updates and should have
+    -- no dependencies, data integrity isn't the biggest concern. Instead, improving
+    -- performance is more relevant – hence, this isn't in BCNF. The only reason it
+    -- isn't done as a view is for performance concerns
 	DROP TABLE IF EXISTS project2.ExtremeRecords;
 	CREATE TABLE project2.ExtremeRecords (
 		`type` VARCHAR(10) NOT NULL,
@@ -1059,7 +1071,9 @@ BEGIN
 		totalCS INT NOT NULL,
         totalOCS INT NOT NULL,
 		`year` INT NOT NULL,
-		tournament_name VARCHAR(75) NOT NULL
+		tournament_name VARCHAR(75) NOT NULL,
+        
+        PRIMARY KEY (`type`)
 	);
 
 	INSERT INTO ExtremeRecords

@@ -9,7 +9,6 @@ namespace MockTrial.DTOs
         [Column("percent-wins")]
         public decimal percent_wins { get; set; }
 
-        [Key]
         public string designator { get; set; }
 
         public string opp_designator { get; set; }
