@@ -950,6 +950,14 @@ CREATE VIEW DetailedBallotView AS
 	UNION
     SELECT ballot_id, tournament_id, round_num, def_num AS team_num, pi_num AS team_num, -pd AS 'pd', '∆' AS side
 		FROM BallotMatchupJoinView;
+        
+DROP VIEW IF EXISTS DetailedMatchupView;
+CREATE VIEW DetailedMatchupView AS
+	SELECT tournament_id, round_num, pi_num AS team_num, def_num AS 'opp_num', 'π' AS side
+		FROM Matchup
+	UNION
+    SELECT tournament_id, round_num, def_num AS team_num, pi_num AS 'opp_num', 'π' AS side
+		FROM Matchup;
 
 DROP VIEW IF EXISTS TeamTotalPD;
 CREATE VIEW TeamTotalPD AS
@@ -1001,14 +1009,14 @@ CREATE VIEW TeamTournamentBallots AS
 DROP VIEW IF EXISTS TeamTournamentCS;
 CREATE VIEW TeamTournamentCS AS
 SELECT m.tournament_id, m.team_num, SUM(b.ballots) AS totalCS
-FROM DetailedBallotView m
+FROM DetailedMatchupView m
 	INNER JOIN TeamTournamentBallots b ON m.tournament_id = b.tournament_id AND m.opp_num = b.team_num
 GROUP BY m.tournament_id, m.team_num;
 
 DROP VIEW IF EXISTS TeamTournamentOCS;
 CREATE VIEW TeamTournamentOCS AS
 SELECT m.tournament_id, m.team_num, SUM(c.totalCS) AS totalOCS
-FROM DetailedBallotView m
+FROM DetailedMatchupView m
 	INNER JOIN TeamTournamentCS c ON m.tournament_id = c.tournament_id AND m.opp_num = c.team_num
 GROUP BY m.tournament_id, m.team_num;
 
@@ -1029,7 +1037,8 @@ CREATE VIEW BestRoundPD AS
             INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
             INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = O.year
 	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num, T.year
-    ORDER BY SUM(D.pd) DESC
+    HAVING AVG(D.pd) < 140
+    ORDER BY AVG(D.pd) DESC
     LIMIT 1;
     
 SELECT * FROM BestRoundPD;
@@ -1041,7 +1050,8 @@ CREATE VIEW SingleBestPD AS
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
             INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year
             INNER JOIN TeamInfo O ON D.opp_num = O.team_num AND T.year = E.year
-	ORDER BY D.pd DESC
+	WHERE D.pd < 140
+    ORDER BY D.pd DESC
     LIMIT 1;
     
 SELECT * FROM SingleBestPD;
@@ -1102,7 +1112,7 @@ DELIMITER ;
 
 CALL create_extreme_records();
 
-SELECT * FROM TeamTournamentRecord WHERE wins = 0;
+SELECT * FROM ExtremeRecords;
 
 CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 
