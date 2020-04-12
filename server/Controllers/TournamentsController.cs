@@ -134,6 +134,7 @@ namespace MockTrial.Controllers
                     t => t.team_num,
                     (s, t) => new {
                         s.student_name,
+                        s.tournament_id,
                         t.team_num,
                         t.team_name,
                         s.ranks,
@@ -141,7 +142,7 @@ namespace MockTrial.Controllers
                         s.side,
                         t.year
                     })
-                    .Where(entry => entry.year == year)
+                    .Where(entry => entry.year == year && entry.tournament_id == id)
                     .ToListAsync());
             } catch (Exception e)
             {
