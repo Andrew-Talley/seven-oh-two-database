@@ -121,5 +121,32 @@ namespace MockTrial.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet]
+        [Route("{id:int}/students")]
+        public async Task<IActionResult> getStudents(int id)
+        {
+            try {
+                var year = (await _context.tournaments.SingleOrDefaultAsync(t => t.tournament_id == id)).year;
+                return Ok(await _context.students
+                    .Join(_context.teamInfos,
+                    s => s.team_num,
+                    t => t.team_num,
+                    (s, t) => new {
+                        s.student_name,
+                        t.team_num,
+                        t.team_name,
+                        s.ranks,
+                        s.role,
+                        s.side,
+                        t.year
+                    })
+                    .Where(entry => entry.year == year)
+                    .ToListAsync());
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
