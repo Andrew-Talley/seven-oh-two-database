@@ -1152,8 +1152,8 @@ SELECT * FROM group_matchups;
 
 DROP VIEW IF EXISTS allTournamentsInfo;
 CREATE VIEW allTournamentsInfo AS
-SELECT t.tournament_id, t.start_date, t.end_date, t.host, COUNT(ti.team_num) AS teamCount, AVG(ti.tpr_points) AS avgPoints
-FROM tournament t
-	LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
-    LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
-GROUP BY t.tournament_id;
+	SELECT t.name, t.tournament_id, t.level, t.start_date, t.end_date, t.host, COUNT(ti.team_num) AS teamCount, AVG(ti.tpr_points) AS avgPoints
+	FROM tournament t
+		LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
+		LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
+	GROUP BY t.tournament_id;

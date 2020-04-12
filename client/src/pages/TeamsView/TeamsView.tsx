@@ -10,6 +10,11 @@ export const TeamsView: React.FC = () => {
   
   const { response, loading, error } = useAxios({
     url: '/api/teams',
+    options: {
+      params: {
+        year: activeYear
+      }
+    },
     trigger: activeYear.toString()
   });
 
@@ -19,22 +24,24 @@ export const TeamsView: React.FC = () => {
   return (
     <React.Fragment>
       <h1>All Teams</h1>
-      <ButtonGroup>
-        {YEARS.map(y => (
-          <Button 
-            key={y}
-            active={activeYear === y}
-            onClick={() => setActiveYear(y)}
-          >
-            {y}
-          </Button>
-        ))}
-      </ButtonGroup>
+      <div>
+        <ButtonGroup>
+          {YEARS.map(y => (
+            <Button 
+              key={y}
+              active={activeYear === y}
+              onClick={() => setActiveYear(y)}
+            >
+              {y}
+            </Button>
+          ))}
+        </ButtonGroup>
+      </div>
       {
         loading ? <span>Loading...</span> :
         error ? <span className="text-danger">{error.message}</span> :
         !data || typeof(data) !== 'object' ? <span className="text-danger">Error while loading teams</span> :
-        <TeamTable data={data} />
+        <TeamTable data={data} year={activeYear} />
       }
     </React.Fragment>
   );

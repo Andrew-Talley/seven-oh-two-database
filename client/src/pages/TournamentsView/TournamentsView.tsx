@@ -27,7 +27,7 @@ const COLUMNS: Column[] = [
     </span>
   )},
   { dataField: 'teamCount', text: 'Size' },
-  { dataField: 'averageTPR', text: 'Average TPR', formatter: tpr => parseFloat(tpr).toFixed(3) }
+  { dataField: 'avgPoints', text: 'Average TPR', formatter: tpr => parseFloat(tpr).toFixed(3) }
 ]
 
 const TournamentsView: React.FC = () => {
