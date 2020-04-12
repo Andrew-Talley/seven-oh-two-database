@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText } from 'reactstrap';
-import { StatPanel } from '../StatPanel/StatPanel';
 import useAxios from '@use-hooks/axios';
+import { StatPanel } from '../StatPanel/StatPanel';
 
-export const BestRoundPD: React.FC = () => {
+export const BestBallotPD: React.FC = () => {
   const { response, loading, error } = useAxios({
     url: '/api/stats/bestroundpd',
     trigger: 'go'
@@ -18,7 +17,7 @@ export const BestRoundPD: React.FC = () => {
 
   return (
     <StatPanel
-      heading="Highest Single-Round PD"
+      heading="Highest Single-Ballot PD"
       body={
         error ? <span className="text-danger">{error.message}</span> :
         loading || !data ? 'Loading...' :
@@ -27,7 +26,7 @@ export const BestRoundPD: React.FC = () => {
           <div className="text-muted d-flex flex-column">
             <span>{data.tournament_name}, {date}</span>
             <span>R{data.round_num}, {data.side} vs. {data.opp_num} ({data.opp_name})</span>
-            <span>Average PD: +{data.avg_pd}</span>
+            <span>+{data.avg_pd}</span>
           </div>
         </React.Fragment>
       }

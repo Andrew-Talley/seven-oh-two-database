@@ -14,13 +14,13 @@ namespace MockTrial.DTOs
 
         public int team_num { get; set; }
 
-        // public int opp_num { get; set; }
+        public int opp_num { get; set; }
 
-        // public string tournament_name { get; set; }
+        public string tournament_name { get; set; }
 
-        // public string team_name { get; set; }
+        public string team_name { get; set; }
 
-        // public string opp_name { get; set; }
+        public string opp_name { get; set; }
 
         public int pd { get; set; }
 

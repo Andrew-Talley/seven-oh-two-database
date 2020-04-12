@@ -29,5 +29,11 @@ namespace MockTrial.DTOs
 
         [Column("totalOCS")]
         public int ocs { get; set; }
+
+        public int year { get; set; }
+
+        public string tournament_name { get; set; }
+
+        public string level { get; set; }
     }
 }

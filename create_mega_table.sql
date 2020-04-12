@@ -1055,9 +1055,9 @@ CREATE PROCEDURE create_extreme_records()
 BEGIN
 
 	-- Since this is a temporary table that will need regular updates and should have
-    -- no dependencies, data integrity isn't the biggest concern. Instead, improving
-    -- performance is more relevant – hence, this isn't in BCNF. The only reason it
-    -- isn't done as a view is for performance concerns
+    -- no dependencies, data integrity isn't really a concern. Instead, improving
+    -- performance is more relevant, and so it isn't in BCNF. The only reason it
+    -- isn't done as a view is for performance concerns.
 	DROP TABLE IF EXISTS project2.ExtremeRecords;
 	CREATE TABLE project2.ExtremeRecords (
 		`type` VARCHAR(10) NOT NULL,
@@ -1072,12 +1072,13 @@ BEGIN
         totalOCS INT NOT NULL,
 		`year` INT NOT NULL,
 		tournament_name VARCHAR(75) NOT NULL,
+        `level` VARCHAR(10),
         
         PRIMARY KEY (`type`)
 	);
 
 	INSERT INTO ExtremeRecords
-		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+		SELECT 'best', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name', T.level
 			FROM TournamentTeamInfo I
 				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
 				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
@@ -1087,7 +1088,7 @@ BEGIN
 
 
 	INSERT INTO ExtremeRecords
-		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name'
+		SELECT 'worst', I.tournament_id, I.team_num, E.team_name, I.wins, I.ties, I.losses, I.totalPD, I.totalCS, I.totalOCS, I.year, T.name AS 'tournament_name', T.level
 			FROM TournamentTeamInfo I
 				INNER JOIN Tournament T ON I.tournament_id = T.tournament_id
 				INNER JOIN TeamInfo E ON I.team_num = E.team_num AND T.year = E.year
@@ -1100,6 +1101,8 @@ END //
 DELIMITER ;
 
 CALL create_extreme_records();
+
+SELECT * FROM TeamTournamentRecord WHERE wins = 1;
 
 CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 
