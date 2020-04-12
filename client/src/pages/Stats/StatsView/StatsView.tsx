@@ -8,7 +8,7 @@ export const StatsView: React.FC = () => {
   return (
     <React.Fragment>
       <h1>Stats</h1>
-      <Link to="/tpr-group">
+      <Link to="/tpr-groups">
         <Jumbotron className="stats-category">
           <h1 className="display-4">TPR Groups</h1>
           <img src="/assets/tab-image.png" />

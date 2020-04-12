@@ -5,13 +5,29 @@ import Table, { Column } from 'react-bootstrap-table-next';
 import useAxios from '@use-hooks/axios';
 
 const COLUMNS: Column[] = [
-  { dataField: 'name', text: 'Name' },
-  { dataField: 'start_date', text: 'Date', formatter: (start_date, { end_date }) => (
-    <span>{new Date(start_date)} - {new Date(end_date)}</span>
+  { dataField: 'name', text: 'Name', formatter: (name, { id, division }) => (
+    <Link to={`/tournament/${id}`}>{name}{division ? ' - ' + division: ''}</Link>  
   )},
+  { dataField: 'start_date', text: 'Date', formatter: (start_date, { end_date }) => {
+    const [start, end] = [new Date(start_date), new Date(end_date)];
+    const formatter = new Intl.DateTimeFormat('en', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit'
+    });
+    const [start_string, end_string] = [start, end].map(d => formatter.format(d));
+    return (<span>{start_string} - {end_string}</span>)
+  }, },
   { dataField: 'host', text: 'Host' },
+  { dataField: 'level', text: 'Level', formatter: cell => (
+    <span style={{ 
+      textTransform: (cell === 'orcs' ? 'uppercase' : 'capitalize') 
+    }}>
+      {cell}
+    </span>
+  )},
   { dataField: 'teamCount', text: 'Size' },
-  { dataField: 'averageTPR', text: 'Average TPR' }
+  { dataField: 'averageTPR', text: 'Average TPR', formatter: tpr => parseFloat(tpr).toFixed(3) }
 ]
 
 const TournamentsView: React.FC = () => {
@@ -26,7 +42,6 @@ const TournamentsView: React.FC = () => {
   return (
     <React.Fragment>
       <h1>Tournaments</h1>
-      <Link to="/tournament/1">Tournament 1!</Link>
       {/* <div className="d-flex justify-content-end">
         <Button 
           color="secondary" 
