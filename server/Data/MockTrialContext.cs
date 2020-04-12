@@ -12,12 +12,15 @@ namespace MockTrial.Data
         #region DbSet Declarations
         public DbSet<AMTARepDTO> amtaReps { get; set; }
         public DbSet<BallotDTO> ballots { get; set; }
+        public DbSet<BestRoundPdDTO> bestRoundPds { get; set; }
         public DbSet<CaseComponentsDTO> caseComponents { get; set; }
         public DbSet<CaseDetailsDTO> caseDetails { get; set; }
         public DbSet<CaseNamesDTO> caseNames { get; set; }
         public DbSet<ExhibitDetailsDTO> exhibitDetails { get; set; }
+        public DbSet<GroupMatchupsDTO> groupMatchups { get; set; }
         public DbSet<MatchupDTO> matchups { get; set; }
         public DbSet<MultipleTournamentsDTO> allTournamentsInfo { get; set; }
+        public DbSet<SingleBestPdDTO> singleBestPds { get; set; }
         public DbSet<StudentDTO> students { get; set; }
         public DbSet<TeamInfoDTO> teamInfos { get; set; }
         public DbSet<TeamTournamentResultsDTO> teamTournamentResults { get; set; }
@@ -51,10 +54,6 @@ namespace MockTrial.Data
                 .HasOne(a => a.tournament)
                 .WithMany(t => t.amtaReps)
                 .HasForeignKey(a => a.tournament_id);
-            /* modelBuilder.Entity<BallotDTO>()
-                .HasOne(b => b.matchup)
-                .WithMany(m => m.ballots)
-                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num}); */
             modelBuilder.Entity<CaseComponentsDTO>()
                 .HasOne(cc => cc.caseDetails)
                 .WithMany(cd => cd.caseComponents)
@@ -71,13 +70,8 @@ namespace MockTrial.Data
             modelBuilder.Entity<MatchupDTO>()
                 .HasMany(m => m.ballots)
                 .WithOne(b => b.matchup)
-                .HasForeignKey(b => new {b.tournament_id, b.pi_num, b.round_num})
+                .HasForeignKey(b => new {b.tournament_id, b.team_num, b.round_num})
                 .HasPrincipalKey(m => new {m.tournament_id, m.pi_num, m.round_num});
-            /* modelBuilder.Entity<MatchupDTO>()
-                .HasOne(m => m.teamTournamentResults)
-                .WithMany(t => t.matchups)
-                .HasForeignKey(m => m.tournament_id)
-                .HasPrincipalKey(t => t.tournament_id); */
             modelBuilder.Entity<StudentDTO>()
                 .HasOne(s => s.teamTournamentResults)
                 .WithMany(t => t.students)
@@ -101,13 +95,16 @@ namespace MockTrial.Data
             // Declare the table names for each of our DTOs
             #region Table Declarations
             modelBuilder.Entity<AMTARepDTO>().ToTable("amtarep");
-            modelBuilder.Entity<BallotDTO>().ToTable("ballot");
+            modelBuilder.Entity<BallotDTO>().ToTable("detailedballotview");
+            modelBuilder.Entity<BestRoundPdDTO>().ToTable("bestroundpd");
             modelBuilder.Entity<CaseComponentsDTO>().ToTable("casecomponents");
             modelBuilder.Entity<CaseDetailsDTO>().ToTable("casedetails");
             modelBuilder.Entity<CaseNamesDTO>().ToTable("casenames");
             modelBuilder.Entity<ExhibitDetailsDTO>().ToTable("exhibitdetails");
+            modelBuilder.Entity<GroupMatchupsDTO>().ToTable("group_matchups");
             modelBuilder.Entity<MatchupDTO>().ToTable("matchup");
             modelBuilder.Entity<MultipleTournamentsDTO>().ToTable("alltournamentsinfo");
+            modelBuilder.Entity<SingleBestPdDTO>().ToTable("singlebestpd");
             modelBuilder.Entity<StudentDTO>().ToTable("student");
             modelBuilder.Entity<TeamInfoDTO>().ToTable("teaminfo");
             modelBuilder.Entity<TeamTournamentResultsDTO>().ToTable("teamtournamentresults");

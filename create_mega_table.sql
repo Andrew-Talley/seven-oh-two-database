@@ -1099,8 +1099,6 @@ CREATE OR REPLACE VIEW group_matchups AS
 	WHERE T.level = 'orcs' AND D.round_num = 1
     GROUP BY RTeam.tpr_group_designator, ROpp.tpr_group_designator;
 
-SELECT * FROM group_matchups;
-
 
 DROP VIEW IF EXISTS allTournamentsInfo;
 CREATE VIEW allTournamentsInfo AS

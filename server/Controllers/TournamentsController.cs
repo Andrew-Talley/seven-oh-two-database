@@ -65,7 +65,8 @@ namespace MockTrial.Controllers
                 var ttr = await _context.teamTournamentResults
                     .Include(ttr => ttr.matchups)
                         .ThenInclude(m => m.ballots)
-                    .Where(ttr => ttr.tournament_id == id).ToListAsync();
+                    .Where(ttr => ttr.tournament_id == id)
+                    .ToListAsync();
 
                 foreach(var t in ttr)
                 {
