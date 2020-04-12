@@ -981,16 +981,16 @@ CREATE VIEW TeamTotalLosses AS
 
 DROP VIEW IF EXISTS TeamTournamentRecord;
 CREATE VIEW TeamTournamentRecord AS
-	SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
-	FROM TeamTotalWins w
-		LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
-		LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
+		(SELECT w.tournament_id, w.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+		FROM TeamTotalWins w
+			LEFT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
+			LEFT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num)
 	UNION
-    SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
-	FROM TeamTotalWins w
-		RIGHT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
-		RIGHT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
-	WHERE w.team_num = NULL;
+		(SELECT l.tournament_id, l.team_num, IFNULL(wins, 0) AS wins, IFNULL(ties, 0) AS ties, IFNULL(losses, 0) AS losses
+		FROM TeamTotalLosses l
+			LEFT JOIN TeamTotalTies t ON l.tournament_id = t.tournament_id AND l.team_num = t.team_num
+			LEFT JOIN TeamTotalWins w ON l.tournament_id = w.tournament_id AND l.team_num = w.team_num
+		WHERE w.team_num IS NULL);
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
@@ -1102,7 +1102,7 @@ DELIMITER ;
 
 CALL create_extreme_records();
 
-SELECT * FROM TeamTournamentRecord WHERE wins = 1;
+SELECT * FROM TeamTournamentRecord WHERE wins = 0;
 
 CREATE OR REPLACE VIEW GroupMatchups AS
 	SELECT 
