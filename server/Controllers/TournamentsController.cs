@@ -50,7 +50,7 @@ namespace MockTrial.Controllers
             });
             
             try {
-                return Ok(await _context.allTournamentsInfo.ToListAsync());
+                return Ok(await query.ToListAsync());
             } catch (Exception e)
             {
                 return BadRequest(e.Message);
