@@ -666,7 +666,6 @@ BEGIN
     SET SQL_SAFE_UPDATES=0;
 
 	WHILE student_num <= 5 DO
-    BEGIN
     
 		SELECT CONCAT("UPDATE megatable SET student_", student_num, " = NULL WHERE student_", student_num, " = ''") INTO @sql_str;
 		PREPARE statement FROM @sql_str;           
@@ -689,7 +688,6 @@ BEGIN
 		EXECUTE statement;
 
 		SET student_num = student_num + 1;
-	END;
 	END WHILE;
     
     SET SQL_SAFE_UPDATES=1;
@@ -698,6 +696,8 @@ END //
 DELIMITER ;
 
 CALL insert_students();
+
+SELECT * FROM Student;
         
 INSERT INTO AMTARep
 	SELECT DISTINCT tournament_id, 0, amta_rep_0
