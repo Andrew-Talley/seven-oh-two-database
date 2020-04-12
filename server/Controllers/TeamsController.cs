@@ -20,13 +20,14 @@ namespace MockTrial.Controllers
             _context = context;
         }
 
+        [HttpGet]
         public async Task<IActionResult> getTeams(int year)
         {
             if(year == 0)
             {
                 return BadRequest("A year was not specified");
             }
-            
+
             try
             {                
                 return Ok(await _context.teamInfos

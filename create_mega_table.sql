@@ -497,12 +497,6 @@ CREATE TABLE IF NOT EXISTS `project2`.`ExhibitDetails` (
   PRIMARY KEY (`exhibit_url`),
   INDEX `fk_Exhibit Details_CaseComponents1_idx` (`exhibit_url` ASC))
 ENGINE = MyISAM;
-
-SELECT * FROM Tournament LIMIT 1;
-
-SELECT DISTINCT case_name, LENGTH(case_name)
-		FROM megatable
-	WHERE full_case <> '';
     
 INSERT INTO CaseNames
 	SELECT DISTINCT tournament_year, tournament_level, case_name
@@ -575,18 +569,6 @@ CREATE TABLE TEMP_tab_notes (
     
     PRIMARY KEY (tournament_id, num)
 );
-
-SELECT DISTINCT tournament_id, tab_note_1, tournament_name, tournament_year
-	FROM megatable;
-
-SELECT * FROM megatable WHERE tournament_id = 163;
-    
-SELECT Tournament.* FROM Tournament WHERE tournament_id IN (
-	SELECT M1.tournament_id
-	FROM (SELECT DISTINCT tournament_id, tab_note_0
-				FROM megatable M2) M1
-	GROUP BY M1.tournament_id
-    HAVING COUNT(*) > 1);
 
 INSERT INTO TEMP_tab_notes
 	SELECT DISTINCT tournament_id, 1, tab_note_1
@@ -680,8 +662,6 @@ BEGIN
 	END WHILE;
     
     SET SQL_SAFE_UPDATES=1;
-    
-    SELECT * FROM Student;
 END //
 
 DELIMITER ;
@@ -699,8 +679,6 @@ INSERT INTO AMTARep
 		FROM megatable
 	WHERE amta_rep_2 NOT LIKE '%coin flip%';
 
-SELECT * FROM TeamTournamentResults;
-
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
 		FROM megatable;
@@ -708,8 +686,6 @@ INSERT INTO Matchup
 INSERT INTO Ballot
 	SELECT ballot_id, tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), pd
 		FROM megatable;
-        
-SELECT round_num FROM megatable ORDER BY round_num DESC;
 
 /* 
 	This is necessary because case components has a FK on WitnessDetails but not all case components
@@ -838,11 +814,6 @@ DELIMITER ;
 
 CALL insert_case_components_witness12();
 
-SELECT DISTINCT witness_4_name FROM megatable WHERE exhibit_4_name <> "";
-
--- INSERT INTO tmp_case_components 
-SELECT DISTINCT case_name, 4 AS n_key, "" AS charge, witness_4_name, exhibit_4_name, exhibit_4_url FROM megatable;
-
 DROP PROCEDURE IF EXISTS insert_case_components_exhibit31;
 
 DELIMITER //
@@ -893,16 +864,13 @@ UPDATE tmp_case_components
 SET SQL_SAFE_UPDATES = 1;
 
 INSERT INTO CaseComponents
-	SELECT case_name, n_key, charge, witness_name, exhibit_name
+	SELECT case_name, n_key, charge, witness_name, exhibit_url
 		FROM tmp_case_components;
         
 INSERT INTO ExhibitDetails
 	SELECT * FROM TmpExhibitDetails;
     
-SELECT * FROM CaseComponents;
-    
 DROP PROCEDURE IF EXISTS insert_witness_details;
-SELECT * FROM amtarep;
 DELIMITER //
 
 CREATE PROCEDURE insert_witness_details()
@@ -932,15 +900,9 @@ DELETE FROM WitnessDetails;
 SET SQL_SAFE_UPDATES = 1;
 
 CALL insert_witness_details();
-    
-SELECT DISTINCT exhibit_name, LENGTH(exhibit_name) AS 'len' FROM TmpExhibitDetails;
         
 DROP TABLE tmpexhibitdetails;
 DROP TABLE tmp_case_components;
-
-SELECT * FROM Matchup LIMIT 1;
-
-SELECT DISTINCT side FROM megatable;
 
 DROP VIEW IF EXISTS BallotMatchupJoinView;
 CREATE VIEW BallotMatchupJoinView AS
@@ -963,8 +925,6 @@ CREATE VIEW TeamTotalPD AS
 	SELECT tournament_id, team_num, SUM(pd) AS totalPD
 		FROM DetailedBallotView
 	GROUP BY tournament_id, team_num;
-    
-SELECT * FROM BallotMatchupJoinView LIMIT 1;
 
 DROP VIEW IF EXISTS TeamTotalWins;
 CREATE VIEW TeamTotalWins AS
@@ -1000,9 +960,6 @@ CREATE VIEW TeamTournamentRecord AS
 		RIGHT JOIN TeamTotalTies t ON w.tournament_id = t.tournament_id AND w.team_num = t.team_num
 		RIGHT JOIN TeamTotalLosses l ON w.tournament_id = l.tournament_id AND w.team_num = l.team_num
 	WHERE w.team_num = NULL;
-        
-SELECT * FROM TeamTournamentRecord
-WHERE wins = 0;
         
 DROP VIEW IF EXISTS TeamTournamentBallots;
 CREATE VIEW TeamTournamentBallots AS
@@ -1041,8 +998,6 @@ CREATE VIEW BestRoundPD AS
 	GROUP BY D.tournament_id, D.team_num, D.round_num, D.opp_num
     ORDER BY SUM(D.pd) DESC
     LIMIT 1;
-        
-SELECT * FROM BestRoundPD;
     
 DROP VIEW IF EXISTS SingleBestPD;
 CREATE VIEW SingleBestPD AS
@@ -1051,9 +1006,6 @@ CREATE VIEW SingleBestPD AS
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
 	ORDER BY D.pd DESC
     LIMIT 1;
-    
-SELECT * FROM SingleBestPD;
-
 
 DROP PROCEDURE IF EXISTS create_extreme_records;
 
@@ -1097,8 +1049,6 @@ BEGIN
 		WHERE (T.level = 'regionals' OR T.level = 'orcs' OR T.level = 'nationals') AND (wins+ties+losses >= 8)
 		ORDER BY (wins+ties/2)/(wins+ties+losses) ASC, totalCS/(wins+ties+losses) ASC, totalOCS/(wins+ties+losses) ASC, totalPD/(wins+ties+losses) ASC
 		LIMIT 1;
-        
-        SELECT * FROM ExtremeRecords;
 
 END //
 
