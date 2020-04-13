@@ -4,7 +4,7 @@ import { StatPanel } from '../StatPanel/StatPanel';
 
 export const BestBallotPD: React.FC = () => {
   const { response, loading, error } = useAxios({
-    url: '/api/stats/bestroundpd',
+    url: '/api/stats/singlebestpd',
     trigger: 'go'
   });
 
@@ -26,7 +26,7 @@ export const BestBallotPD: React.FC = () => {
           <div className="text-muted d-flex flex-column">
             <span>{data.tournament_name}, {date}</span>
             <span>R{data.round_num}, {data.side} vs. {data.opp_num} ({data.opp_name})</span>
-            <span>+{data.avg_pd}</span>
+            <span>+{data.pd}</span>
           </div>
         </React.Fragment>
       }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useGetTouranmentResultDataQuery } from "../../graphql-types"
-import { Table, Row, Col } from "reactstrap";
 import useAxios from '@use-hooks/axios';
+import { Table } from 'reactstrap';
 
 const resultCSS: React.CSSProperties = {
   display: 'grid',
@@ -41,12 +41,10 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
                   ocs: t.ocs,
                   pd: t.pd
                 },
-                matchups: matchups.filter((m: any) => m.pi_num === t.team.num)
+                matchups: matchups.filter((m: any) => m.team_num === t.team.num)
               }));
   }, [data, matchups]);
 
-  console.log(data);
-  console.log(matchups);
   console.log(teamData);
 
   return (
@@ -71,11 +69,6 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
               <span>{team.team.name}</span>
             </td>
             {team.matchups.map((match: any) => {
-              // const side = team.team.num === match.pl.num ? 'pl' : 'def';
-              // const sideChar = (side === 'pl' ? '∏' : '∆');
-              // const opp = (
-              //   side === 'pl' ? match.def : match.pl
-              // );
               const numBallots = match.ballots.length;
               const results = match.ballots.map((b: any) => b.ballot_result);
               const pds = match.ballots.map((b: any) => b.pd);
@@ -87,22 +80,22 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
               return (
                 <td key={match.round_num} style={{textAlign: 'center'}}>
                   <div style={matchupCSS}>
-                    <span></span>
-                    <span>v. {match.def_num}</span>
-                    <span></span>
-                    {/* <span>{sideChar}</span>
-                    <span>v.</span> */}
+                    <span>{match.side}</span>
+                    <span>v.</span>
+                    <span>{match.opp_num}</span>
                   </div>
                   <div style={resultCSS}>
-                    {results.map((r: string, i: number) => (
+                    {pds.map((pd: number, i: number) => (
                       <span key={i}>
-                        {r}
+                        {pd > 0 ? 'W' : pd < 0 ? 'L' : 'T'}
                       </span>
                     ))}
                   </div>
                   <div style={resultCSS}>
                     {pds.map((pd: number, i: number) => (
-                      <span key={i}>{pd}</span>
+                      <span key={i}>
+                        {pd}
+                      </span>
                     ))}
                   </div>
                 </td>

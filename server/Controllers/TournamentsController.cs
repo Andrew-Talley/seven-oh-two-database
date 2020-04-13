@@ -58,6 +58,22 @@ namespace MockTrial.Controllers
         }
 
         [HttpGet]
+        [Route("{id:int}/name")]
+        public async Task<IActionResult> getTournamentName(int id)
+        {
+            try {
+                var tourn = await _context.tournaments
+                            .Where(t => t.tournament_id == id)
+                            .ToListAsync();
+
+                return Ok(tourn[0].tournament_name);
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
         [Route("{id:int}")]
         public async Task<IActionResult> getTournament(int id)
         {

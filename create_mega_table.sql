@@ -199,7 +199,7 @@ CREATE TABLE megatable(
 );
 
 -- LOAD DATA INFILE 'C:\\wamp64\\tmp\\full-data.csv'
-LOAD DATA INFILE '~/Google Drive/College Work/Junior/Spring/Databases/full-data.csv'
+LOAD DATA INFILE '~/Documents/GitHub/seven-oh-two/full-data.csv'
 	IGNORE
 	INTO TABLE megatable
 	FIELDS TERMINATED BY ','
@@ -1045,7 +1045,7 @@ SELECT * FROM BestRoundPD;
         
 DROP VIEW IF EXISTS SingleBestPD;
 CREATE VIEW SingleBestPD AS
-	SELECT D.*, T.name AS 'tournament_name', E.team_name, O.team_name AS "opp_name"
+	SELECT D.*, T.name AS 'tournament_name', T.start_date, E.team_name, O.team_name AS "opp_name"
 		FROM DetailedBallotView D
 			INNER JOIN Tournament T ON D.tournament_id = T.tournament_id
             INNER JOIN TeamInfo E ON D.team_num = E.team_num AND T.year = E.year

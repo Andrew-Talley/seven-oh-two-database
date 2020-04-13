@@ -7,8 +7,8 @@ const COLUMNS: Column[] = [
   { dataField: 'caseName', text: 'Case Name', formatter: (name, { year, nationalsCase}) => (
     <Link to={`/cases/${year}/${nationalsCase === '1' ? 'nationals' : 'regionals'}`}>{name}</Link>
   ) },
-  { dataField: 'year', text: 'Year', formatter: (year, { nationalsCase }) => (
-    `${year}${nationalsCase === '0' ? '' : ' (Nationals Case)'}`
+  { dataField: 'year', text: 'Year', formatter: (year, { isNationals }) => (
+    `${year}${isNationals === 1 ? ' (Nationals Case)' : ''}`
   ) },
   { dataField: 'caseType', text: 'Type of Charge' }
 ];

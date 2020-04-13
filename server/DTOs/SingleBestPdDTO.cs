@@ -22,6 +22,8 @@ namespace MockTrial.DTOs
 
         public string opp_name { get; set; }
 
+        public string start_date { get; set; }
+
         public int pd { get; set; }
 
         public string side { get; set; }

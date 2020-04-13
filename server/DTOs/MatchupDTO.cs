@@ -9,11 +9,13 @@ namespace MockTrial.DTOs
     {
         public int tournament_id { get; set; }
 
-        public int pi_num { get; set; }
+        public int team_num { get; set; }
 
         public int round_num { get; set; }
 
-        public int def_num { get; set; }
+        public int opp_num { get; set; }
+
+        public string side { get; set; }
 
         public List<BallotDTO> ballots { get; set; }
 
