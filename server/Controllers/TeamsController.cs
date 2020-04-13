@@ -51,14 +51,14 @@ namespace MockTrial.Controllers
         public async Task<IActionResult> getTeam(int year, int num) {
             try
             {
-                var teamData = await _context.teamInfos
-                    .Where(t => t.year == year && t.team_num == num)
-                    .Include(t => t.tournamentResults)
-                    .ToListAsync();
+                // var teamData = await _context.teamInfos
+                //     .Where(t => t.year == year && t.team_num == num)
+                //     .Include(t => t.tournamentResults)
+                //     .ToListAsync();
 
-                return Ok({
-                    teamInfo = null,
-                    tournaments = null 
+                return Ok(new {
+                    teamInfo = "HI",
+                    tournaments = "HI" 
                 });
             } catch (Exception e)
             {
