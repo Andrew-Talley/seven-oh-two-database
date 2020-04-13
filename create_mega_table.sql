@@ -631,6 +631,8 @@ CREATE TABLE TEMP_Group_Deisgnator (
 	`tpr_group_designator` CHAR(1) NULL
 );
 
+SELECT * FROM Student WHERE tournament_id = 268;
+
 INSERT INTO TEMP_Group_Deisgnator
 	SELECT tournament_id, team_num, MIN(tpr_group_designator)
 		FROM megatable
@@ -662,7 +664,7 @@ BEGIN
 	DECLARE student_num INT;
     DECLARE sql_str VARCHAR(1000);
     
-    SET student_num = 1;
+    SET student_num = 0;
     SET SQL_SAFE_UPDATES=0;
 
 	WHILE student_num <= 5 DO
@@ -709,6 +711,11 @@ INSERT INTO AMTARep
 	SELECT DISTINCT tournament_id, 2, amta_rep_2
 		FROM megatable
 	WHERE amta_rep_2 NOT LIKE '%coin flip%';
+    
+SET SQL_SAFE_UPDATES=0;
+DELETE FROM AMTARep
+	WHERE amta_rep = "";
+SET SQL_SAFE_UPDATES=1;
 
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
@@ -956,7 +963,7 @@ CREATE VIEW DetailedMatchupView AS
 	SELECT tournament_id, round_num, pi_num AS team_num, def_num AS 'opp_num', 'π' AS side
 		FROM Matchup
 	UNION
-    SELECT tournament_id, round_num, def_num AS team_num, pi_num AS 'opp_num', 'π' AS side
+    SELECT tournament_id, round_num, def_num AS team_num, pi_num AS 'opp_num', '∆' AS side
 		FROM Matchup;
 
 DROP VIEW IF EXISTS TeamTotalPD;
@@ -1053,10 +1060,6 @@ CREATE VIEW SingleBestPD AS
 	WHERE D.pd < 140
     ORDER BY D.pd DESC
     LIMIT 1;
-    
-SELECT * FROM DetailedMatchupView;
-    
-SELECT * FROM SingleBestPD;
 
 DROP PROCEDURE IF EXISTS create_extreme_records;
 
@@ -1136,3 +1139,7 @@ CREATE VIEW allTournamentsInfo AS
 		LEFT JOIN teamtournamentresults ttr ON t.tournament_id = ttr.tournament_id
 		LEFT JOIN teaminfo ti ON ttr.team_num = ti.team_num AND t.year = ti.year
 	GROUP BY t.tournament_id;
+    
+SELECT * FROM Matchup M
+	LEFT JOIN Ballot B ON M.tournament_id = B.Matchup_tournament_id AND M.pi_num = B.Matchup_pi_num AND M.round_num = B.Matchup_round_num
+WHERE B.ballot_id IS NULL;

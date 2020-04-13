@@ -9,16 +9,21 @@ import { compareTeamData } from '../../functions/sortTeamData';
 import { Row, Col } from 'reactstrap';
 import { OutstandingStudentTable } from '../../components/OutstandingStudentTable/OutstandingStudentTable';
 
+const format = Intl.DateTimeFormat('en-us', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric'
+});
 
 export const SingleTournamentView: React.FC = () => {
   const { id } = useRouteMatch<{ id: string }>().params;
 
-  const { response: nameResp } = useAxios({
-    url: `/api/tournaments/${id}/name`,
+  const { response: dataResp } = useAxios({
+    url: `/api/tournaments/${id}/info`,
     trigger: id.toString()
   });
 
-  const tournName = nameResp?.data;
+  const tournData = dataResp?.data;
 
   const { response, loading, error } = useAxios({
     url: `/api/tournaments/${id}/students`,
@@ -31,7 +36,15 @@ export const SingleTournamentView: React.FC = () => {
 
   return (
     <React.Fragment>
-      <h1>{tournName}</h1>
+      <h1>{tournData?.tournament_name}</h1>
+      {
+        tournData?.host &&
+        <h2>Hosted by {tournData.host}{tournData.location && ` at ${tournData.location}`}</h2>
+      }
+      {
+        tournData?.start_date && tournData?.end_date &&
+        <h3>{format.format(new Date(tournData.start_date))} - {format.format(new Date(tournData.end_date))}</h3>
+      }
       <TournamentResultTable id={parseInt(id)} />
       {
         error ? error.message :
@@ -58,6 +71,15 @@ export const SingleTournamentView: React.FC = () => {
             }
           </Col>
         </Row>
+      }
+      {
+        tournData?.amtaReps && 
+        <React.Fragment>
+          <h3>AMTA Representatives</h3>
+          {tournData.amtaReps.map((r: any) => (
+            <p key={r.id}>{r.amta_rep}</p>
+          ))}
+        </React.Fragment>
       }
     </React.Fragment>
   );
