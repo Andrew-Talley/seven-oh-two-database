@@ -40,7 +40,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<CaseDetailsDTO>().HasKey(c => c.case_name);
             modelBuilder.Entity<CaseNamesDTO>().HasKey(c => new {c.year, c.level});
             modelBuilder.Entity<ExhibitDetailsDTO>().HasKey(e => e.exhibit_url);
-            modelBuilder.Entity<MatchupDTO>().HasKey(m => new {m.tournament_id, m.pi_num, m.def_num});
+            modelBuilder.Entity<MatchupDTO>().HasKey(m => new {m.tournament_id, m.team_num, m.opp_num});
             modelBuilder.Entity<StudentDTO>().HasKey(s => new {s.student_id, s.tournament_id, s.team_num});
             modelBuilder.Entity<TeamInfoDTO>().HasKey(t => new {t.team_num, t.year});
             modelBuilder.Entity<TeamTournamentResultsDTO>().HasKey(t => new {t.tournament_id, t.team_num});
@@ -76,7 +76,7 @@ namespace MockTrial.Data
                 .HasMany(m => m.ballots)
                 .WithOne(b => b.matchup)
                 .HasForeignKey(b => new {b.tournament_id, b.team_num, b.round_num})
-                .HasPrincipalKey(m => new {m.tournament_id, m.pi_num, m.round_num});
+                .HasPrincipalKey(m => new {m.tournament_id, m.team_num, m.round_num});
             modelBuilder.Entity<StudentDTO>()
                 .HasOne(s => s.teamTournamentResults)
                 .WithMany(t => t.students)
@@ -107,7 +107,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<CaseNamesDTO>().ToTable("casenames");
             modelBuilder.Entity<ExhibitDetailsDTO>().ToTable("exhibitdetails");
             modelBuilder.Entity<GroupMatchupsDTO>().ToTable("group_matchups");
-            modelBuilder.Entity<MatchupDTO>().ToTable("matchup");
+            modelBuilder.Entity<MatchupDTO>().ToTable("detailedmatchupview");
             modelBuilder.Entity<MultipleTournamentsDTO>().ToTable("alltournamentsinfo");
             modelBuilder.Entity<SingleBestPdDTO>().ToTable("singlebestpd");
             modelBuilder.Entity<StudentDTO>().ToTable("student");
