@@ -2,15 +2,17 @@ import * as React from 'react';
 import { useGetTouranmentResultDataQuery } from "../../graphql-types"
 import useAxios from '@use-hooks/axios';
 import { Table } from 'reactstrap';
+import { MatchupCell } from '../MatchupsRow/MatchupCell';
 
 const resultCSS: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(7, 1fr)'
 }
-const matchupCSS: React.CSSProperties = {
+const csCSS: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(3, 1fr)'
 }
+
 
 interface Props {
   id: number
@@ -21,7 +23,8 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
     trigger: id.toString()
   });
 
-  const data = response?.data.map((t: any) => t.teams);
+  const data = response?.data.teams.map((t: any) => t.teams);
+  const ballots = response?.data.ballots;
   console.log(data);
 
   return (
@@ -45,38 +48,14 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
               <span>{team.team.num}</span>
               <span>{team.team.name}</span>
             </td>
-            {team.matchups.map((match: any) => {
-              const numBallots = match.ballots.length;
-              const results = match.ballots.map((b: any) => b.ballot_result);
-              const pds = match.ballots.map((b: any) => b.pd);
-
-              const resultCSS: React.CSSProperties = {
-                display: 'grid',
-                gridTemplateColumns: `repeat(${numBallots}, 1fr)`
-              };
+            {team.matchups.sort((a: any, b: any) => a.round_num - b.round_num).map((match: any) => {
+              const matchBallots = ballots.filter((b: any) => b.team_num === match.team_num && b.opp_num === match.opp_num && b.round_num === match.round_num);
               return (
-                <td key={match.round_num} style={{textAlign: 'center'}}>
-                  <div style={matchupCSS}>
-                    <span>{match.side}</span>
-                    <span>v.</span>
-                    <span>{match.opp_num}</span>
-                  </div>
-                  <div style={resultCSS}>
-                    {pds.map((pd: number, i: number) => (
-                      <span key={i}>
-                        {pd > 0 ? 'W' : pd < 0 ? 'L' : 'T'}
-                      </span>
-                    ))}
-                  </div>
-                  <div style={resultCSS}>
-                    {pds.map((pd: number, i: number) => (
-                      <span key={i}>
-                        {pd}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-              )
+                <MatchupCell
+                  match={match}
+                  ballots={matchBallots}
+                />
+              );
             })}
             <td style={{textAlign: 'center'}}>
               <div style={resultCSS}>
@@ -87,7 +66,7 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
                 <span>-</span>
                 <span>{team.ties}</span>
               </div>
-              <div style={matchupCSS}>
+              <div style={csCSS}>
                 <span>CS</span>
                 <span>OCS</span>
                 <span>PD</span>

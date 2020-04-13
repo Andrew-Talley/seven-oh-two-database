@@ -55,6 +55,24 @@ namespace MockTrial.Controllers
         }
 
         [HttpGet]
+        [Route("{id:int}/ballots")]
+        public async Task<IActionResult> getBallots(int id)
+        {
+            try {
+                var ballotTask = _context.ballots
+                    .Where(b => b.tournament_id == id)
+                    .ToListAsync();
+                var ballots = await ballotTask;
+                return Ok(new {
+                    ballots
+                });
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
         [Route("{id:int}")]
         public async Task<IActionResult> getTournament(int id)
         {

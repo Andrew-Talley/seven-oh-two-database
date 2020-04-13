@@ -712,10 +712,7 @@ INSERT INTO AMTARep
 		FROM megatable
 	WHERE amta_rep_2 NOT LIKE '%coin flip%';
     
-SET SQL_SAFE_UPDATES=0;
-DELETE FROM AMTARep
-	WHERE amta_rep = "";
-SET SQL_SAFE_UPDATES=1;
+SELECT * FROM DetailedBallotView WHERE tournament_id = 268 AND team_num = 1089;
 
 INSERT INTO Matchup
 	SELECT DISTINCT tournament_id, team_num, ROUND(CAST(round_num AS DECIMAL(2,1))), opp_num
