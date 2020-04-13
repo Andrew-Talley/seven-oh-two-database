@@ -53,40 +53,50 @@ namespace MockTrial.Controllers
         {
             try {
                 var year = (await _context.tournaments.SingleAsync(t => t.tournament_id == id)).year;
-                var ttr = _context.teamTournamentResults
+                var ttrTask = _context.teamTournamentResults
                     .Where(ttr => ttr.tournament_id == id)
-                    .Select(t => new {
-                        t.team_num,
-                        matchups = t.matchups.Select(m => new {
-                            m.tournament_id,
-                            m.team_num,
-                            m.opp_num,
-                            m.round_num,
-                            m.side
-                        }).Where(m => m.team_num == t.team_num)
-                    });
+                    .Include(ttr => ttr.matchups)
+                        .ThenInclude(m => m.ballots)
+                    .ToListAsync();
 
-                return Ok(
-                            await (from r in ttr
-                            join t in _context.teamInfos
-                                on r.team_num equals t.team_num
-                            where t.year == year
-                            join tti in _context.TournamentTeamData
-                                on t.team_num equals tti.team_num
-                            where tti.tournament_id == id
+                var teamsTourneyTask = _context.teamInfos
+                                    .Join(_context.TournamentTeamData,
+                                    ti => ti.team_num,
+                                    ttd => ttd.team_num,
+                                    (ti, ttd) => new {ti, ttd})
+                                    .Where(res => res.ti.year == year && res.ttd.tournament_id == id)
+                                    .ToListAsync();
+
+                var ttr = await ttrTask;
+                var teamsWithTourney = await teamsTourneyTask;
+
+                foreach(var result in ttr)
+                {
+                    foreach(var m in result.matchups)
+                    {
+                        m.teamTournamentResults = null;
+                        foreach(var b in m.ballots)
+                        {
+                            b.matchup = null;
+                        }
+                    }
+                }
+
+                return Ok(from r in ttr
+                            join t in teamsWithTourney
+                                on r.team_num equals t.ti.team_num
                             select new {
                                 teams = new {
-                                    team = t,
+                                    team = t.ti,
                                     matchups = r.matchups,
-                                    wins = tti.total_wins,
-                                    ties = tti.total_ties,
-                                    losses = tti.total_losses,
-                                    CS = tti.total_cs,
-                                    OCS = tti.total_ocs,
-                                    PD = tti.total_pd
+                                    wins = t.ttd.total_wins,
+                                    ties = t.ttd.total_ties,
+                                    losses = t.ttd.total_losses,
+                                    CS = t.ttd.total_cs,
+                                    OCS = t.ttd.total_ocs,
+                                    PD = t.ttd.total_pd
                                 }
-                            }).ToListAsync()
-                            );
+                            });
             } catch (Exception e)
             {
                 return BadRequest(e.Message);

@@ -88,8 +88,8 @@ namespace MockTrial.Data
             modelBuilder.Entity<TeamTournamentResultsDTO>()
                 .HasMany(tr => tr.matchups)
                 .WithOne(m => m.teamTournamentResults)
-                .HasForeignKey(m => m.tournament_id)
-                .HasPrincipalKey(ttr => ttr.tournament_id);
+                .HasForeignKey(m => new {m.tournament_id, m.team_num})
+                .HasPrincipalKey(ttr => new {ttr.tournament_id, ttr.team_num});
             modelBuilder.Entity<WitnessDetailsDTO>()
                 .HasOne<CaseComponentsDTO>(w => w.caseComponents)
                 .WithOne(c => c.witness)
