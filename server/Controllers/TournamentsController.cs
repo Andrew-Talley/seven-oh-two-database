@@ -87,7 +87,10 @@ namespace MockTrial.Controllers
                                 on r.team_num equals t.ti.team_num
                             select new {
                                 teams = new {
-                                    team = t.ti,
+                                    team = new {
+                                        num = t.ti.team_num,
+                                        name = t.ti.team_name
+                                    },
                                     matchups = r.matchups,
                                     wins = t.ttd.total_wins,
                                     ties = t.ttd.total_ties,
