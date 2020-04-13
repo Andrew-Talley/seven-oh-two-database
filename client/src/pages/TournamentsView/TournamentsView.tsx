@@ -5,8 +5,8 @@ import Table, { Column } from 'react-bootstrap-table-next';
 import useAxios from '@use-hooks/axios';
 
 const COLUMNS: Column[] = [
-  { dataField: 'name', text: 'Name', formatter: (name, { id, division }) => (
-    <Link to={`/tournament/${id}`}>{name}{division ? ' - ' + division: ''}</Link>  
+  { dataField: 'name', text: 'Name', formatter: (name, { tournament_id, division }) => (
+    <Link to={`/tournament/${tournament_id}`}>{name}{division ? ' - ' + division: ''}</Link>  
   )},
   { dataField: 'start_date', text: 'Date', formatter: (start_date, { end_date }) => {
     const [start, end] = [new Date(start_date), new Date(end_date)];

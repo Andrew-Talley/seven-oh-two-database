@@ -1054,6 +1054,8 @@ CREATE VIEW SingleBestPD AS
     ORDER BY D.pd DESC
     LIMIT 1;
     
+SELECT * FROM DetailedMatchupView;
+    
 SELECT * FROM SingleBestPD;
 
 DROP PROCEDURE IF EXISTS create_extreme_records;
