@@ -56,7 +56,10 @@ namespace MockTrial.Controllers
                     .Include(t => t.tournamentResults)
                     .ToListAsync();
 
-                return Ok(teamData);
+                return Ok({
+                    teamInfo = null,
+                    tournaments = null 
+                });
             } catch (Exception e)
             {
                 return BadRequest(e.Message);
