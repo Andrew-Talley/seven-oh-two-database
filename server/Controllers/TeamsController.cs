@@ -51,14 +51,54 @@ namespace MockTrial.Controllers
         public async Task<IActionResult> getTeam(int year, int num) {
             try
             {
-                var teamData = await _context.teamInfos
-                    .Where(t => t.year == year && t.team_num == num)
-                    .Include(t => t.tournamentResults)
+                var teamTournamentDataTask = _context.TournamentTeamData
+                    .Where(ttd => ttd.team_num == num && ttd.year == year)
                     .ToListAsync();
 
-                return Ok({
-                    teamInfo = null,
-                    tournaments = null 
+                var teamDataTask = _context.teamInfos
+                    .Where(t => t.year == year && t.team_num == num)
+                    .SingleOrDefaultAsync();
+
+                var tournamentsTask = _context.tournaments                   
+                    .Include(t => t.tournamentResults)
+                        .ThenInclude(tr => tr.matchups)
+                            .ThenInclude(m => m.ballots)
+                    .Where(t => t.year == year) 
+                    .ToListAsync();
+
+                var teamData = await teamDataTask;
+                var tournaments = await tournamentsTask;
+                var teamTournamentData = await teamTournamentDataTask;
+
+                // Remove cycles and cut down data a bit
+                foreach(var t in tournaments)
+                {
+                    t.tournamentResults = t.tournamentResults.Where(tr => tr.team_num == num).ToList();
+                    foreach(var tr in t.tournamentResults)
+                    {
+                        tr.tournament = null;
+                        foreach(var m in tr.matchups)
+                        {
+                            m.teamTournamentResults = null;
+                            foreach(var b in m.ballots)
+                            {
+                                b.matchup = null;
+                            }
+                        }
+                    }
+                }
+
+                var data = (from t in tournaments
+                            join ttd in teamTournamentData
+                                on t.tournament_id equals ttd.tournament_id
+                            select new {
+                                tournament = t,
+                                tournamentResults = ttd
+                            }).ToList();
+
+                return Ok(new {
+                    team = teamData,
+                    data
                 });
             } catch (Exception e)
             {
