@@ -35,7 +35,7 @@ namespace MockTrial.Data
             // Declare all of the primary keys
             #region Primary Key Declarations
             modelBuilder.Entity<AMTARepDTO>().HasKey(a => new {a.amta_num, a.tournament_id});
-            modelBuilder.Entity<BallotDTO>().HasKey(b => b.ballot_id);
+            modelBuilder.Entity<BallotDTO>().HasKey(b => new {b.ballot_id, b.side});
             modelBuilder.Entity<CaseComponentsDTO>().HasKey(c => new {c.case_name, c.n_key});
             modelBuilder.Entity<CaseDetailsDTO>().HasKey(c => c.case_name);
             modelBuilder.Entity<CaseNamesDTO>().HasKey(c => new {c.year, c.level});

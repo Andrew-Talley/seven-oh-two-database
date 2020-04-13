@@ -71,19 +71,11 @@ namespace MockTrial.Controllers
 
                 var ttrTask = _context.teamTournamentResults
                     .Where(ttr => ttr.tournament_id == id)
-                    .ToListAsync();
-
-                var matchupTask = _context.matchups
-                    .Where(m => m.tournament_id == id)
-                    .ToListAsync();
-
-                var ballotTask = _context.ballots
-                    .Where(b => b.tournament_id == id)
+                    .Include(ttr => ttr.matchups)
+                        .ThenInclude(m => m.ballots)
                     .ToListAsync();
 
                 var ttr = await ttrTask;
-                var matchups = await matchupTask;
-                var ballots = await ballotTask;
                 var teamsWithTourney = await teamsTourneyTask;
 
                 // This breaks a cyclical pattern where e.g. matchup -> ballot -> matchup -> ballot -> ... occurs
@@ -92,7 +84,10 @@ namespace MockTrial.Controllers
                     foreach(var m in result.matchups)
                     {
                         m.teamTournamentResults = null;
-                        m.ballots = null; // Adding them doesn't work anyway so we will send ballots back separately
+                        foreach(var b in m.ballots)
+                        {
+                            b.matchup = null;
+                        }
                     }
                 }
 
@@ -115,10 +110,7 @@ namespace MockTrial.Controllers
                                 }
                             }).ToList();
 
-                return Ok(new {
-                    teams = data,
-                    ballots
-                });
+                return Ok(data);
             } catch (Exception e)
             {
                 return BadRequest(e.Message);
