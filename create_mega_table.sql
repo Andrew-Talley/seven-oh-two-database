@@ -4,7 +4,7 @@ CREATE DATABASE project2;
 USE project2;
 
 CREATE TABLE megatable(
-	ballot_id INT,
+	ballot_id INT, -- Used as our primary key
 	team_num SMALLINT,
 	round_num CHAR(3),
 	opp_num SMALLINT,
@@ -204,7 +204,7 @@ LOAD DATA INFILE '~/Documents/GitHub/seven-oh-two/full-data.csv'
 	INTO TABLE megatable
 	FIELDS TERMINATED BY ','
 	OPTIONALLY ENCLOSED BY '"'
-IGNORE 1 LINES;
+IGNORE 1 LINES; -- The first line has the names of the columns
 
 
 SET SQL_SAFE_UPDATES=0;
@@ -213,7 +213,7 @@ DELETE FROM megatable
 	WHERE team_num = opp_num; # A team should never be playing itself – this means a team dropped out, so the tab shows them "playing themselves"
 
 DELETE FROM megatable
-	WHERE Side = "∆";
+	WHERE Side = "∆"; -- Storing only the data where teams play as "pi" side
     
 UPDATE megatable
 	SET start_date = NULL
