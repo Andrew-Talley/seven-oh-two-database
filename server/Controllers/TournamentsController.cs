@@ -53,11 +53,6 @@ namespace MockTrial.Controllers
         {
             try {
                 var year = (await _context.tournaments.SingleAsync(t => t.tournament_id == id)).year;
-                var ttrTask = _context.teamTournamentResults
-                    .Where(ttr => ttr.tournament_id == id)
-                    .Include(ttr => ttr.matchups)
-                        .ThenInclude(m => m.ballots)
-                    .ToListAsync();
 
                 var teamsTourneyTask = _context.teamInfos
                                     .Join(_context.TournamentTeamData,
@@ -67,14 +62,32 @@ namespace MockTrial.Controllers
                                     .Where(res => res.ti.year == year && res.ttd.tournament_id == id)
                                     .ToListAsync();
 
+                var ttrTask = _context.teamTournamentResults
+                    .Where(ttr => ttr.tournament_id == id)
+                    .ToListAsync();
+
+                var matchupTask = _context.matchups
+                    .Where(m => m.tournament_id == id)
+                    .ToListAsync();
+
+                var ballotTask = _context.ballots
+                    .Where(b => b.tournament_id == id)
+                    .ToListAsync();
+
                 var ttr = await ttrTask;
+                var matchups = await matchupTask;
+                var ballots = await ballotTask;
                 var teamsWithTourney = await teamsTourneyTask;
 
+                // This breaks a cyclical pattern where e.g. matchup -> ballot -> matchup -> ballot -> ... occurs
                 foreach(var result in ttr)
                 {
                     foreach(var m in result.matchups)
                     {
                         m.teamTournamentResults = null;
+                        // Not all of the ballots are loaded for some reason so I have to do that here
+                        m.ballots = ballots.Where(b => b.team_num == m.team_num && b.opp_num == m.opp_num &&
+                            b.round_num == m.round_num).ToList();
                         foreach(var b in m.ballots)
                         {
                             b.matchup = null;
