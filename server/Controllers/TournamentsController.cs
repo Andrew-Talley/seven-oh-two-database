@@ -92,17 +92,11 @@ namespace MockTrial.Controllers
                     foreach(var m in result.matchups)
                     {
                         m.teamTournamentResults = null;
-                        // Not all of the ballots are loaded for some reason so I have to do that here
-                        m.ballots = ballots.Where(b => b.team_num == m.team_num && b.opp_num == m.opp_num &&
-                            b.round_num == m.round_num).ToList();
-                        foreach(var b in m.ballots)
-                        {
-                            b.matchup = null;
-                        }
+                        m.ballots = null; // Adding them doesn't work anyway so we will send ballots back separately
                     }
                 }
 
-                return Ok(from r in ttr
+                var data = (from r in ttr
                             join t in teamsWithTourney
                                 on r.team_num equals t.ti.team_num
                             select new {
@@ -119,7 +113,12 @@ namespace MockTrial.Controllers
                                     OCS = t.ttd.total_ocs,
                                     PD = t.ttd.total_pd
                                 }
-                            });
+                            }).ToList();
+
+                return Ok(new {
+                    teams = data,
+                    ballots
+                });
             } catch (Exception e)
             {
                 return BadRequest(e.Message);
