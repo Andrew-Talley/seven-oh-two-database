@@ -45,5 +45,22 @@ namespace MockTrial.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet]
+        [Route("{year:int}/{num:int}")]
+        public async Task<IActionResult> getTeam(int year, int num) {
+            try
+            {
+                var teamData = await _context.teamInfos
+                    .Where(t => t.year == year && t.team_num == num)
+                    .Include(t => t.tournamentResults)
+                    .ToListAsync();
+
+                return Ok(teamData);
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

@@ -23,8 +23,7 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
     trigger: id.toString()
   });
 
-  const data = response?.data.teams.map((t: any) => t.teams);
-  const ballots = response?.data.ballots;
+  const data = response?.data.map((t: any) => t.teams);
   console.log(data);
 
   return (
@@ -48,15 +47,12 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
               <span>{team.team.num}</span>
               <span>{team.team.name}</span>
             </td>
-            {team.matchups.sort((a: any, b: any) => a.round_num - b.round_num).map((match: any) => {
-              const matchBallots = ballots.filter((b: any) => b.team_num === match.team_num && b.opp_num === match.opp_num && b.round_num === match.round_num);
-              return (
-                <MatchupCell
-                  match={match}
-                  ballots={matchBallots}
-                />
-              );
-            })}
+            {team.matchups.sort((a: any, b: any) => a.round_num - b.round_num).map((match: any) => (
+              <MatchupCell
+                match={match}
+                ballots={match.ballots}
+              />
+            ))}
             <td style={{textAlign: 'center'}}>
               <div style={resultCSS}>
                 <span></span>

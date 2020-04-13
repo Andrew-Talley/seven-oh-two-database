@@ -34,7 +34,7 @@ export const MatchupCell: React.FC<Props> = ({ match, ballots }) => {
       <div style={resultCSS}>
         {pds.map((pd: number, i: number) => (
           <span key={i}>
-            {pd}
+            {pd > 0 ? '+' : ''}{pd}
           </span>
         ))}
       </div>

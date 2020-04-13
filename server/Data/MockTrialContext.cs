@@ -81,6 +81,8 @@ namespace MockTrial.Data
                 .HasOne(s => s.teamTournamentResults)
                 .WithMany(t => t.students)
                 .HasForeignKey(s => new {s.tournament_id, s.team_num});
+            modelBuilder.Entity<TeamInfoDTO>().
+                HasMany(t => t.tournamentResults);
             modelBuilder.Entity<TeamTournamentResultsDTO>()
                 .HasOne(tr => tr.tournament)
                 .WithMany(t => t.tournamentResults)

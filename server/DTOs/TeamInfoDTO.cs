@@ -19,6 +19,6 @@ namespace MockTrial.DTOs
 
         public string school { get; set; }
 
-        // public List<TeamTournamentResultsDTO> tournamentResults { get; set; }
+        public List<TeamTournamentResultsDTO> tournamentResults { get; set; }
     }
 }
