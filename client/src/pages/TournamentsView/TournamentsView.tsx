@@ -8,7 +8,14 @@ const COLUMNS: Column[] = [
   { dataField: 'name', text: 'Name', formatter: (name, { tournament_id, division }) => (
     <Link to={`/tournament/${tournament_id}`}>{name}{division ? ' - ' + division: ''}</Link>  
   )},
-  { dataField: 'start_date', text: 'Date', formatter: (start_date, { end_date }) => {
+  { 
+    dataField: 'start_date', 
+    text: 'Date', 
+    sort: true, 
+    sortFunc: ((a, b, order) => (
+      (new Date(a) > new Date(b) ? 1 : -1) * (order === 'desc' ? 1 : -1)
+    )),
+    formatter: (start_date, { end_date }) => {
     const [start, end] = [new Date(start_date), new Date(end_date)];
     const formatter = new Intl.DateTimeFormat('en', {
       year: 'numeric',
@@ -42,20 +49,19 @@ const TournamentsView: React.FC = () => {
   return (
     <React.Fragment>
       <h1>Tournaments</h1>
-      {/* <div className="d-flex justify-content-end">
-        <Button 
-          color="secondary" 
-          outline
-          size="sm"
-        >
-          Show Detailed View
-        </Button>
-      </div> */}
       {
         loading ? "Loading..." :
         error ? error.message :
         !data ? 'Failed to low data...' :
-        <Table columns={COLUMNS} data={data} keyField='id' />
+        <Table 
+          columns={COLUMNS} 
+          data={data} 
+          keyField='id'
+          defaultSorted={[{
+            dataField: 'date',
+            order: 'desc'
+          }]}
+        />
       }
     </React.Fragment>
   )

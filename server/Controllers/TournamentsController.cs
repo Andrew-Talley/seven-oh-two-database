@@ -32,15 +32,22 @@ namespace MockTrial.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}/name")]
-        public async Task<IActionResult> getTournamentName(int id)
+        [Route("{id:int}/info")]
+        public async Task<IActionResult> getTournamentInfo(int id)
         {
             try {
-                var tourn = await _context.tournaments
+                var tourns = await _context.tournaments
                             .Where(t => t.tournament_id == id)
+                            .Include(t => t.amtaReps)
                             .ToListAsync();
 
-                return Ok(tourn[0].tournament_name);
+                var tourn = tourns[0];
+                foreach(var amtarep in tourn.amtaReps) 
+                {
+                    amtarep.tournament = null;
+                }
+
+                return Ok(tourn);
             } catch (Exception e)
             {
                 return BadRequest(e.Message);

@@ -21,48 +21,25 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
     trigger: id.toString()
   });
 
-  const data = response?.data;
-
-  const matchups = React.useMemo(() => {
-    if (!data) return;
-    return data[0].teams.matchups;
-  }, [data]);
-  const teamData: any[] = React.useMemo(() => {
-    if (!data) return;
-    if (!matchups) return;
-    return data.map((team: any) => team.teams)
-              .map((t: any) => ({
-                team: t.team,
-                record: {
-                  wins: t.wins,
-                  ties: t.ties,
-                  losses: t.losses,
-                  cs: t.cs,
-                  ocs: t.ocs,
-                  pd: t.pd
-                },
-                matchups: matchups.filter((m: any) => m.team_num === t.team.num)
-              }));
-  }, [data, matchups]);
-
-  console.log(teamData);
+  const data = response?.data.map((t: any) => t.teams);
+  console.log(data);
 
   return (
     error ? <h2 className="text-danger">{error.message}</h2> :
     loading ? <h2>Loading...</h2> :
-    !teamData ? <h2>Couldn't find data for tournament id {id}</h2> :
+    !data ? <h2>Couldn't find data for tournament id {id}</h2> :
     <Table>
       <thead>
         <tr>
           <th>Team</th>
           {[1,2,3,4].map(i => (
-            <th key={i}>Round {i}</th>
+            <th style={{textAlign: 'center'}} key={i}>Round {i}</th>
           ))}
-          <th>Summary</th>
+          <th style={{textAlign: 'center'}}>Summary</th>
         </tr>
       </thead>
       <tbody>
-        {teamData.map((team: any) => (
+        {data.map((team: any) => (
           <tr key={team.team.num}>
             <td className="d-flex flex-column">
               <span>{team.team.num}</span>
@@ -104,19 +81,19 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
             <td style={{textAlign: 'center'}}>
               <div style={resultCSS}>
                 <span></span>
-                <span>{team.record.wins}</span>
+                <span>{team.wins}</span>
                 <span>-</span>
-                <span>{team.record.losses}</span>
+                <span>{team.losses}</span>
                 <span>-</span>
-                <span>{team.record.ties}</span>
+                <span>{team.ties}</span>
               </div>
               <div style={matchupCSS}>
                 <span>CS</span>
                 <span>OCS</span>
                 <span>PD</span>
-                <span>{team.record.cs}</span>
-                <span>{team.record.ocs}</span>
-                <span>{team.record.pd}</span>
+                <span>{team.cs}</span>
+                <span>{team.ocs}</span>
+                <span>{team.pd}</span>
               </div>
             </td>
           </tr>

@@ -4,7 +4,7 @@ import Table, { Column } from 'react-bootstrap-table-next';
 const COLUMNS: Column[] = [
   { dataField: 'side', text: 'Side' },
   { dataField: 'student_name', text: 'Name' },
-  { dataField: 'ranks', text: 'Ranks' }
+  { dataField: 'ranks', text: 'Ranks', sort: true }
 ]
 
 const TEAM_NAME_COLUMN: Column = {
@@ -36,6 +36,10 @@ export const OutstandingStudentTable: React.FC<Props> = ({ data, showSchool = tr
       keyField='student'
       columns={columns}
       data={data}
+      defaultSorted={[{
+        dataField: 'ranks',
+        order: 'desc'
+      }]}
     />
   )
 }

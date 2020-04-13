@@ -235,7 +235,7 @@ declare module 'react-bootstrap-table-next' {
         formatExtraData?: TODO;
         formatter?: (cell: TODO, row: TODO, rowIndex: number, formatExtraData: any) => string | ReactElement | undefined
         headerStyle?: (colum: TODO, colIndex: number) => any
-        sortFunc?<T>(a: T, b: T, order: 'asc' | 'desc', rowA: Row, rowB: Row): number
+        sortFunc?(a: any, b: any, order: 'asc' | 'desc', rowA: Row, rowB: Row): number
         style?: (colum: TODO, colIndex: number) => {}
         filterValue?<T>(cell: T, row: TODO): any
         onSort?(dataField: string, order: SortOrder): void
