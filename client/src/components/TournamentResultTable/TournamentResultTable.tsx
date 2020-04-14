@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useGetTouranmentResultDataQuery } from "../../graphql-types"
 import useAxios from '@use-hooks/axios';
 import { Table } from 'reactstrap';
-import { MatchupCell } from '../MatchupsRow/MatchupCell';
+import { MatchupCell } from '../MatchupsCell/MatchupCell';
+import { Link } from 'react-router-dom';
 
 const resultCSS: React.CSSProperties = {
   display: 'grid',
@@ -15,9 +16,10 @@ const csCSS: React.CSSProperties = {
 
 
 interface Props {
-  id: number
+  id: number;
+  year?: string;
 }
-export const TournamentResultTable: React.FC<Props> = ({ id }) => {
+export const TournamentResultTable: React.FC<Props> = ({ id, year }) => {
   const { response, loading, error } = useAxios({
     url: `/api/tournaments/${id}`,
     trigger: id.toString()
@@ -43,10 +45,12 @@ export const TournamentResultTable: React.FC<Props> = ({ id }) => {
       <tbody>
         {data.map((team: any) => (
           <tr key={team.team.num}>
-            <td className="d-flex flex-column">
-              <span>{team.team.num}</span>
-              <span>{team.team.name}</span>
-            </td>
+            <Link to={year && `/teams/${year}/${team.team.num}`}>
+              <td className="d-flex flex-column">
+                <span>{team.team.num}</span>
+                <span>{team.team.name}</span>
+              </td>
+            </Link>
             {team.matchups.sort((a: any, b: any) => a.round_num - b.round_num).map((match: any) => (
               <MatchupCell
                 match={match}
