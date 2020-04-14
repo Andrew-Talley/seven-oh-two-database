@@ -62,12 +62,17 @@ namespace MockTrial.Controllers
                 var tournamentsTask = _context.tournaments                   
                     .Include(t => t.tournamentResults)
                         .ThenInclude(tr => tr.matchups)
-                            .ThenInclude(m => m.ballots)
+                            // .ThenInclude(m => m.ballots)
                     .Where(t => t.year == year) 
+                    .ToListAsync();
+
+                var ballotsTask = _context.ballots
+                    .Where(b => b.team_num == num)
                     .ToListAsync();
 
                 var teamData = await teamDataTask;
                 var tournaments = await tournamentsTask;
+                var ballots = await ballotsTask;
                 var teamTournamentData = await teamTournamentDataTask;
 
                 // Remove cycles and cut down data a bit
@@ -80,6 +85,9 @@ namespace MockTrial.Controllers
                         foreach(var m in tr.matchups)
                         {
                             m.teamTournamentResults = null;
+                            m.ballots = ballots.Where(b => m.tournament_id == b.tournament_id
+                                && m.opp_num == b.opp_num && m.round_num == b.round_num
+                                && m.side == b.side).ToList();
                             foreach(var b in m.ballots)
                             {
                                 b.matchup = null;
