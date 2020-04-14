@@ -3,6 +3,7 @@ import useAxios from '@use-hooks/axios';
 import { Table } from 'reactstrap';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { MatchupCell } from '../../components/MatchupsCell/MatchupCell';
+import { ResultsCell } from '../../components/ResultsCell/ResultsCell';
 
 export const SingleTeamView: React.FC = () => {
   const { year, teamNum } = useRouteMatch<Record<'year'|'teamNum', string>>().params;
@@ -15,7 +16,7 @@ export const SingleTeamView: React.FC = () => {
   const data = response?.data;
 
   const teamName = data?.team.teamName;
-  const tournaments = data?.data.map((t: any) => t.tournament);
+  const tournaments = data?.data;
 
   return (
     error ? <span className="text-danger">{error.message}</span> :
@@ -24,8 +25,10 @@ export const SingleTeamView: React.FC = () => {
       <h1>{teamName}</h1>
       {data?.tpr_points && <h3>TPR: {data?.tpr_rank}</h3>}
       <h2>Tournaments</h2>
-      {tournaments.map((t: any) => {
-        const { matchups } = t.tournamentResults[0];
+      {tournaments.map((tournament: any) => {
+        const t = tournament.tournament;
+        const results = tournament.tournamentResults;
+        const { matchups } = t.tournamentResults[0] as { matchups: any[] };
 
         return (
           <React.Fragment key={t.tournament_id}>
@@ -45,13 +48,14 @@ export const SingleTeamView: React.FC = () => {
               </thead>
               <tbody>
                 <tr>
-                  {matchups.map((m: any) => (
+                  {matchups.sort((a, b) => a.round_num - b.round_num).map(m => (
                     <MatchupCell
                       key={m.round_num}
                       match={m}
                       ballots={m.ballots}
                     />
                   ))}
+                  <ResultsCell results={results} />
                 </tr>
               </tbody>
             </Table>

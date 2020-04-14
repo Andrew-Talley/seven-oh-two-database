@@ -4,6 +4,7 @@ import useAxios from '@use-hooks/axios';
 import { Table } from 'reactstrap';
 import { MatchupCell } from '../MatchupsCell/MatchupCell';
 import { Link } from 'react-router-dom';
+import { ResultsCell } from '../ResultsCell/ResultsCell';
 
 const resultCSS: React.CSSProperties = {
   display: 'grid',
@@ -57,24 +58,7 @@ export const TournamentResultTable: React.FC<Props> = ({ id, year }) => {
                 ballots={match.ballots}
               />
             ))}
-            <td style={{textAlign: 'center'}}>
-              <div style={resultCSS}>
-                <span></span>
-                <span>{team.wins}</span>
-                <span>-</span>
-                <span>{team.losses}</span>
-                <span>-</span>
-                <span>{team.ties}</span>
-              </div>
-              <div style={csCSS}>
-                <span>CS</span>
-                <span>OCS</span>
-                <span>PD</span>
-                <span>{team.cs}</span>
-                <span>{team.ocs}</span>
-                <span>{team.pd}</span>
-              </div>
-            </td>
+            <ResultsCell results={team} />
           </tr>
         ))}
       </tbody>
