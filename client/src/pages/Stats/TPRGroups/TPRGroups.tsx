@@ -58,7 +58,7 @@ export const TPRGroups: React.FC = () => {
           ))}
         </tbody>
       </Table>
-      <h2 className="mt-4">Bid Frequency</h2>
+      {/* <h2 className="mt-4">Bid Frequency</h2>
       <p className="text-muted">How often teams got bids by TPR Group before 2020 vs. this season</p>
       <Table>
         {groupsHeader()}
@@ -72,7 +72,7 @@ export const TPRGroups: React.FC = () => {
             </tr>
           ))}
         </tbody>
-      </Table>
+      </Table> */}
     </React.Fragment>
   )
 }

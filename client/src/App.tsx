@@ -6,6 +6,7 @@ import { Navbar, NavbarToggler, Collapse, NavItem, Nav, NavLink, NavbarBrand, Co
 import client from './apollo-setup';
 import { ApolloProvider } from '@apollo/client';
 // import Landing from './components/landing';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import './stylesheets/main.scss';
 import { routes } from './routes';

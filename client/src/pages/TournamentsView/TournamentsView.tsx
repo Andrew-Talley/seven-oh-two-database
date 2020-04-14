@@ -2,7 +2,10 @@ import * as React from 'react';
 import { useGetTournamentsViewQuery } from '../../graphql-types';
 import { Link } from 'react-router-dom';
 import Table, { Column } from 'react-bootstrap-table-next';
+
 import useAxios from '@use-hooks/axios';
+import ToolkitProvider from 'react-bootstrap-table2-toolkit';
+import { SearchBar } from '../../components/SearchBar/SearchBar';
 
 const COLUMNS: Column[] = [
   { dataField: 'name', text: 'Name', formatter: (name, { tournament_id, division }) => (
@@ -11,10 +14,6 @@ const COLUMNS: Column[] = [
   { 
     dataField: 'start_date', 
     text: 'Date', 
-    sort: true, 
-    sortFunc: ((a, b, order) => (
-      (new Date(a) > new Date(b) ? 1 : -1) * (order === 'desc' ? 1 : -1)
-    )),
     formatter: (start_date, { end_date }) => {
     const [start, end] = [new Date(start_date), new Date(end_date)];
     const formatter = new Intl.DateTimeFormat('en', {
@@ -53,15 +52,28 @@ const TournamentsView: React.FC = () => {
         loading ? "Loading..." :
         error ? error.message :
         !data ? 'Failed to low data...' :
-        <Table 
-          columns={COLUMNS} 
-          data={data} 
+        <ToolkitProvider
           keyField='id'
+          data={data}
+          columns={COLUMNS}
           defaultSorted={[{
             dataField: 'date',
             order: 'desc'
           }]}
-        />
+          search
+        >
+          {
+            (props: any) => (
+              <React.Fragment>
+                <SearchBar 
+                  {...props.searchProps}
+                  placeholder="Search for tournaments..."
+                />
+                <Table {...props.baseProps} />
+              </React.Fragment>
+            )
+          }
+        </ToolkitProvider>
       }
     </React.Fragment>
   )
