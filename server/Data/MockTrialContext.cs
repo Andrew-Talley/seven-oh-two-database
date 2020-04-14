@@ -106,7 +106,7 @@ namespace MockTrial.Data
             modelBuilder.Entity<CaseDetailsDTO>().ToTable("casedetails");
             modelBuilder.Entity<CaseNamesDTO>().ToTable("casenames");
             modelBuilder.Entity<ExhibitDetailsDTO>().ToTable("exhibitdetails");
-            modelBuilder.Entity<GroupMatchupsDTO>().ToTable("group_matchups");
+            modelBuilder.Entity<GroupMatchupsDTO>().ToTable("groupmatchups");
             modelBuilder.Entity<MatchupDTO>().ToTable("detailedmatchupview");
             modelBuilder.Entity<MultipleTournamentsDTO>().ToTable("alltournamentsinfo");
             modelBuilder.Entity<SingleBestPdDTO>().ToTable("singlebestpd");
