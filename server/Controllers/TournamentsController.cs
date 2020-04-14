@@ -101,12 +101,12 @@ namespace MockTrial.Controllers
                                         name = t.ti.team_name
                                     },
                                     matchups = r.matchups,
-                                    wins = t.ttd.total_wins,
-                                    ties = t.ttd.total_ties,
-                                    losses = t.ttd.total_losses,
-                                    CS = t.ttd.total_cs,
-                                    OCS = t.ttd.total_ocs,
-                                    PD = t.ttd.total_pd
+                                    total_wins = t.ttd.total_wins,
+                                    total_ties = t.ttd.total_ties,
+                                    total_losses = t.ttd.total_losses,
+                                    total_cs = t.ttd.total_cs,
+                                    total_ocs = t.ttd.total_ocs,
+                                    total_pd = t.ttd.total_pd
                                 }
                             }).ToList();
 

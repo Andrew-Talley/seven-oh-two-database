@@ -45,7 +45,7 @@ export const SingleTournamentView: React.FC = () => {
         tournData?.start_date && tournData?.end_date &&
         <h3>{format.format(new Date(tournData.start_date))} - {format.format(new Date(tournData.end_date))}</h3>
       }
-      <TournamentResultTable id={parseInt(id)} />
+      <TournamentResultTable year={tournData?.year} id={parseInt(id)} />
       {
         error ? error.message :
         loading || !response ? 'Loading individual awards...' :

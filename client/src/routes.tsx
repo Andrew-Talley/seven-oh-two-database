@@ -20,7 +20,7 @@ export const routes: Route[] = [
   { path: '/superlatives', children: <Superlatives /> },
   { path: '/tpr-groups', children: <TPRGroups /> },
   { path: '/stats', children: <StatsView />, exact: true },
-  { path: '/teams/:teamNum', children: <SingleTeamView /> },
+  { path: '/teams/:year/:teamNum', children: <SingleTeamView /> },
   { path: '/teams', children: <TeamsView />, exact: true },
   { path: '/cases/:year/:level', children: <SingleCaseView /> },
   { path: '/cases', children: <CasesView />, exact: true }
