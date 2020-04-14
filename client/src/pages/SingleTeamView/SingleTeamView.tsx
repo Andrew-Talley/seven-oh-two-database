@@ -15,7 +15,7 @@ export const SingleTeamView: React.FC = () => {
 
   const data = response?.data;
 
-  const teamName = data?.team.teamName;
+  const teamName = data?.team.team_name;
   const tournaments = data?.data;
 
   return (
@@ -23,7 +23,7 @@ export const SingleTeamView: React.FC = () => {
     loading || !data ? <span>Loading...</span> :
     <React.Fragment>
       <h1>{teamName}</h1>
-      {data?.tpr_points && <h3>TPR: {data?.tpr_rank}</h3>}
+      {data?.team.tpr_points && <h3>TPR: {data?.team.tpr_rank}</h3>}
       <h2>Tournaments</h2>
       {tournaments.map((tournament: any) => {
         const t = tournament.tournament;

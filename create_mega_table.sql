@@ -229,8 +229,8 @@ CREATE TABLE IF NOT EXISTS `project2`.`Tournament` (
   `end_date` DATE NULL,
   `host` VARCHAR(75) NULL,
   `location` VARCHAR(75) NULL,
-  `first_coin_flip` VARCHAR(45) NULL,
-  `second_coin_flip` VARCHAR(45) NULL,
+  `first_coin_flip` VARCHAR(45) NULL CHECK IN ('Heads', 'Tails'),
+  `second_coin_flip` VARCHAR(45) NULL CHECK IN ('Heads', 'Tails'),
   `bid_start_date` DATE NULL,
   `bid_end_date` DATE NULL,
   `bid_location` VARCHAR(45) NULL,
@@ -301,9 +301,9 @@ CREATE TABLE IF NOT EXISTS `project2`.`Student` (
   `tournament_id` INT NOT NULL,
   `team_num` SMALLINT NOT NULL,
   `student` VARCHAR(75) NOT NULL,
-  `role` VARCHAR(8) NOT NULL,
+  `role` VARCHAR(8) NOT NULL CHECK IN ('Attorney', 'Witness'),
   `ranks` TINYINT UNSIGNED NOT NULL,
-  `side` VARCHAR(8) NOT NULL,
+  `side` VARCHAR(8) NOT NULL CHECK IN ('π', '∆'),
   PRIMARY KEY (`student_id`, `tournament_id`, `team_num`),
   INDEX `fk_Student_Team1_idx` (`tournament_id` ASC, `team_num` ASC),
   CONSTRAINT `fk_Student_Team1`
@@ -389,7 +389,7 @@ CREATE TABLE IF NOT EXISTS `project2`.`CaseDetails` (
   `case_name` VARCHAR(60) NOT NULL,
   `full_case` VARCHAR(150) NULL,
   `nationals_case` TINYINT NULL,
-  `type_charge` VARCHAR(10) NULL,
+  `type_charge` VARCHAR(10) NULL CHECK IN ('Criminal', 'Civil'),
   PRIMARY KEY (`case_name`),
   CONSTRAINT `fk_CaseName_CaseDetails`
     FOREIGN KEY (`case_name`)
@@ -426,8 +426,8 @@ DROP TABLE IF EXISTS `project2`.`WitnessDetails` ;
 
 CREATE TABLE IF NOT EXISTS `project2`.`WitnessDetails` (
   `witness_name` VARCHAR(45) NOT NULL,
-  `witness_type` VARCHAR(45) NULL,
-  `witness_side` VARCHAR(8) NULL,
+  `witness_type` VARCHAR(45) NULL CHECK IN ('Character', 'Police Officer', 'Expert', 'Defendant', 'Party Representative'),
+  `witness_side` VARCHAR(8) NULL CHECK IN ('π', '∆', 'Swing'),
   `witness_affidaivit` VARCHAR(110) NULL,
   INDEX `fk_WitnessDetails_CaseComponents_idx` (`witness_name` ASC),
   PRIMARY KEY (`witness_name`),

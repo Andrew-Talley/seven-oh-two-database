@@ -3,7 +3,7 @@ import { TeamTable } from '../../components/TeamTable/TeamTable';
 import useAxios from '@use-hooks/axios';
 import { ButtonGroup, Button } from 'reactstrap';
 
-const YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020];
+const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020];
 
 export const TeamsView: React.FC = () => {
   const [activeYear, setActiveYear] = React.useState(2020);

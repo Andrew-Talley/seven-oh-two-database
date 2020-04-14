@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Card, Jumbotron, Row, Col } from 'reactstrap';
 
-import './StatsView.scss';
 import { Link } from 'react-router-dom';
 
 export const StatsView: React.FC = () => {

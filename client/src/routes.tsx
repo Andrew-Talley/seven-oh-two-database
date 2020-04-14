@@ -9,6 +9,7 @@ import { TeamsView } from './pages/TeamsView/TeamsView';
 import { CasesView } from './pages/CasesView/CasesView';
 import { SingleTeamView } from './pages/SingleTeamView/SingleTeamView';
 import { SingleCaseView } from './pages/SingleCaseView/SingleCaseVIew';
+import { HomePage } from './pages/HomePage/HomePage';
 
 interface Route extends RouteProps {
   path: string;
@@ -23,5 +24,6 @@ export const routes: Route[] = [
   { path: '/teams/:year/:teamNum', children: <SingleTeamView /> },
   { path: '/teams', children: <TeamsView />, exact: true },
   { path: '/cases/:year/:level', children: <SingleCaseView /> },
-  { path: '/cases', children: <CasesView />, exact: true }
+  { path: '/cases', children: <CasesView />, exact: true },
+  { path: '/', children: <HomePage />, exact: true }
 ]

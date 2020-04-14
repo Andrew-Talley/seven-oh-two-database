@@ -39,6 +39,7 @@ export const TeamTable: React.FC<Props> = ({ data, year }) => {
         keyField={'teamNum'}
         columns={COLUMNS}
         data={data}
+        search
       >
         {(props: any) => (
           <React.Fragment>

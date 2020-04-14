@@ -6,6 +6,11 @@ A web app for interacting with mock trial data
 2. .NET Core v3.1, found here: https://dotnet.microsoft.com/download/dotnet-core/3.1
 3. MySQL
 
+## Database Setup Instructions
+1. Download the database from (this link)[https://drive.google.com/open?id=1gnMA7QHsgSid0pjma60Wzgs0tQHvFaBU]
+2. Open `create_mega_table.sql` script and edit the path to the database on line 469
+3. Run the file with your preferred method (e.g., using MySQLWorkbench)
+
 ## Dev Environment Setup Instructions
 1. cd into client and enter `npm i` to install node modules
 2. To build the client app into bundle.js which resides in server/wwwroot, run `npx webpack` or `npx webpack -w`
