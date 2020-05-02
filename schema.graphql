@@ -41,10 +41,28 @@ type Team {
 }
 
 type Case {
-  id: Int!
+  caseName: String!
+  year: Int!
+  caseType: String!
+
+  exhibits: [Exhibit!]!
+  charges: [String!]!
+  witnesses: [Witness!]!
+}
+
+type Exhibit {
+  name: String!
+  exhibit_url: String!
+}
+type Witness {
+  name: String!
+  side: String!
+  type: String!
 }
 
 type Query {
-  allTournaments: [Tournament!]!
+  tournaments: [Tournament!]!
   tournament(tournamentId: Int): Tournament
+
+  cases: [Case!]!
 }

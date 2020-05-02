@@ -1216,3 +1216,6 @@ CREATE OR REPLACE VIEW GroupMatchups AS
 	WHERE T.level = 'orcs' AND D.round_num = 1
     GROUP BY RTeam.tpr_group_designator, ROpp.tpr_group_designator;
 
+UPDATE Ballot
+	SET pd = 10
+WHERE ballot_id = 2;
